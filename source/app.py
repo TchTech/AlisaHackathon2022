@@ -8,25 +8,27 @@ from classes.manage_product import InfoProduct
 app = Flask(__name__)
 
 ##Создание jsona
-instance = JsonManager("words.json")
-json = instanse.json_object
-phrases = json["Phrases"]
-buttons = json["Buttons"]
+json = JsonManager("words.json")
+phrases_json = json.json_object["Phrases"]
+buttons_json = json.json_object["Buttons"]
 
 ##Наборы приветствий, прощаний и т.д.
-phrases["HelloWords"] = ["привет", "приветствую", "прив", "приветик", "привит", "здравствуйте", "здравствуй", "зравия желаю", "здарова"]
-phrases["ExitWords"] = ["выход", "выключись", "пока", "прощай", "как меня зовут", "переведи на английский"] ##Фразы при которых Алиса выйдет из сессии
-phrases["LeaveWords"] = ["Выключаюсь...", "Выключаю навык \"ИнфоЕд\"", "Выходим из \"Инфоеда\""] ##Фразы которые Алиса скажет когда выключит навык
+HelloWords = phrases_json["HelloWords"] = ["привет", "приветствую", "прив", "приветик", "привит", "здравствуйте", "здравствуй", "зравия желаю", "здарова"]
+ExitWords = phrases_json["ExitWords"] = ["выход", "выключись", "пока", "прощай", "как меня зовут", "переведи на английский"] ##Фразы при которых Алиса выйдет из сессии
+LeaveWords = phrases_json["LeaveWords"] = ["Выключаюсь...", "Выключаю навык \"ИнфоЕд\"", "Выходим из \"Инфоеда\""] ##Фразы которые Алиса скажет когда выключит навык
 
 ##Разные наборы кнопок
-buttons["EmptyButtons"]=[]
-UserFirstCommand = [{"title": "Посчитай чай", "hide": True}]
-OnlyExitButton = [{"title": "Выход", "hide": True}]
-OnlyMoreButton = [{"title": "Больше", "hide": True}]
-DefaultButtons = [
+EmptyButtons = buttons_json["EmptyButtons"] = []
+UserFirstCommand = buttons_json["UserFirstCommand"] = [{"title": "Посчитай чай", "hide": True}]
+OnlyExitButton = buttons_json["OnlyExitButton"] = [{"title": "Выход", "hide": True}]
+OnlyMoreButton = buttons_json["OnlyMoreButton"] = [{"title": "Больше", "hide": True}]
+DefaultButtons = buttons_json["DefaultButtons"] = [
     {"title": "Больше", "hide": True},
     {"title": "Выход", "hide": True}
 ]
+
+##Сохранение наборов
+json.save()
 
 ##Первые команды пользователей
 users_first_command = {}
