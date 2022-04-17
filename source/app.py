@@ -21,8 +21,10 @@ DefaultButtons = [
 
 @app.route("/", methods=["POST"])
 def main():
-    text = request.json["request"]["command"].lower().strip() ##Текст пользователя
-    response_text = text
+    req = request.json ##Ответ от алисы
+    text = req["request"]["command"].lower().strip() ##Текст пользователя
+    version = req["version"] ##Версия
+    
     end = False ##Выходим из навыка (True/False)
     buttons = OnlyExitButton 
 
@@ -45,7 +47,7 @@ def main():
             "end_session": end,
             "buttons": buttons
         },
-        "version": "1.0"
+        "version": version
     }
 
     return response
