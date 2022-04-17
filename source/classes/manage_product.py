@@ -1,6 +1,7 @@
 import csv
-class InfoProduct():
 
+class InfoProduct():
+    
     name: str = None #Название продукта
     weight: float = None #Вес 
     proteins: float = None #Белки
@@ -9,47 +10,48 @@ class InfoProduct():
     calories: float = None #Калории
     
     def __init__(self, product: str): #Инициализация объекта (конструктор)
-            with open('products.csv') as csvfile: 
-                    reader = csv.DictReader(csvfile) 
-                    for row in reader: 
-                            if product.lower() in row["Продукт"].split(" ")[0]:
-                                    self.name = row["Продукт"]
-                                    self.weight = row["Вес (г)"]
-                                    self.proteins = row["Белки"]
-                                    self.fats = row["Жиры"]
-                                    self.carbohydrates = row["Углеводы"]
-                                    self.calories = row["Калории"]
-                                    break
+        with open('products.csv') as csvfile:
+            reader = csv.DictReader(csvfile) 
+            for row in reader: 
+                if product.lower() in row["Продукт"].split(" ")[0]:
+                    self.name = row["Продукт"]
+                    self.weight = row["Вес (г)"]
+                    self.proteins = row["Белки"]
+                    self.fats = row["Жиры"]
+                    self.carbohydrates = row["Углеводы"]
+                    self.calories = row["Калории"]
+                    break
 
     def get_json(self) -> dict: #Метод, создающий json с полями класса
-            return {
-                    "Продукт" : self.name,
-                    "Вес (г)" : self.weight,
-                    "Белки" : self.proteins,
-                    "Жиры" : self.fats,
-                    "Углеводы" : self.carbohydrates,
-                    "Калории" : self.calories
-            } 
+        return {
+            "Продукт" : self.name,
+            "Вес (г)" : self.weight,
+            "Белки" : self.proteins,
+            "Жиры" : self.fats,
+            "Углеводы" : self.carbohydrates,
+            "Калории" : self.calories
+        } 
 
     def beautiful_text(self) -> str:
-        	return  f"В продукте \"{self.name}\" содержится:\n•Белков: {self.proteins}\n•Жиров: {self.fats}\n•Углеводов: {self.carbohydrates}\n•Калорий: {self.calories}"
+        return  f"В продукте \"{self.name}\" содержится:\n•Белков: {self.proteins}\n•Жиров: {self.fats}\n•Углеводов: {self.carbohydrates}\n•Калорий: {self.calories}"
 
         
         
 class ProductSearch():
+    
     list_of_categories = ["Белки", "Жиры", "Углеводы", "Калории"]
     list_of_limits = ["min", "max"]
                     
     def search_by_value(self, value:float, category:str = "Калории") -> list:
 
         if category.lower().title() in self.list_of_categories:
+            
             best_value: float = None
             best_product: str = None
             best_value_of_category: float = None
 
             with open('products.csv') as csvfile:
                 reader = csv.DictReader(csvfile)
-
                 for row in reader:
 
                     if best_product is None:
@@ -68,12 +70,14 @@ class ProductSearch():
             return ["Категория не найдена!", 0]
 
     def search_by_limit(self, limit:str = "max", category:str = "Калории") -> list:
+        
         if category.lower().title() in self.list_of_categories and limit.lower() in self.list_of_limits:
+            
             best_product: str = None
             best_value: float = None
+                
             with open('products.csv') as csvfile:
                 reader = csv.DictReader(csvfile)
-
                 for row in reader:
 
                     if best_product is None:
@@ -90,5 +94,6 @@ class ProductSearch():
                         best_value = float(row[category.lower().title()])
                         
             return [best_product, best_value]
+        
         else:
             return ["Указанной категории не существует или указанный лимит неверный", 0]
