@@ -1,5 +1,6 @@
 import csv
 
+##Класс с информацией о продукте
 class InfoProduct():
     
     name: str = None #Название продукта
@@ -36,11 +37,11 @@ class InfoProduct():
 
     def beautiful_text(self) -> str:
         if None not in (self.name, self.proteins, self.fats, self.carbohydrates, self.calories):
-            return  f"В продукте \"{self.name}\" содержится:\n•Белков: {self.proteins}\n•Жиров: {self.fats}\n•Углеводов: {self.carbohydrates}\n•Калорий: {self.calories}"
+            return  f"В продукте \"{self.name}\" на {self.weight} грамм содержится:\n•Белков: {self.proteins} грамм\n•Жиров: {self.fats} грамм\n•Углеводов: {self.carbohydrates} грамм\n•Калорий: {self.calories} ккал"
         else:
             return f"Продукт \"{self.user_product}\" не найден..."
         
-        
+##Класс для поиска продукта по определённым характеристикам
 class ProductSearch():
     
     list_of_categories = ["Белки", "Жиры", "Углеводы", "Калории"]
