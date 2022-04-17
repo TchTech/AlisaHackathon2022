@@ -23,6 +23,7 @@ class InfoProduct():
                     self.fats = row["Жиры"]
                     self.carbohydrates = row["Углеводы"]
                     self.calories = row["Калории"]
+                    #self.category = row["Категория"]
                     break
 
     def get_json(self) -> dict: #Метод, создающий json с полями класса
@@ -32,7 +33,8 @@ class InfoProduct():
             "Белки" : self.proteins,
             "Жиры" : self.fats,
             "Углеводы" : self.carbohydrates,
-            "Калории" : self.calories
+            "Калории" : self.calories,
+            #"Категория" : self.category
         } 
 
     def beautiful_text(self) -> str:

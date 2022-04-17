@@ -37,9 +37,10 @@ users_first_command = {}
 @app.route("/", methods=["POST"])
 def main():
     req = request.json ##Ответ от алисы
-    text = req["request"]["command"].lower().strip() ##Текст пользователя
+    text = req["request"]["command"].lower().strip().replace(",", "").replace(".", "") ##Текст пользователя
     version = req["version"] ##Версия (алисы)
     user_id = req["session"]["user_id"] ##id пользователя
+    #first_start = False
 
     response_text = text
     end = False ##Выходим из навыка (True/False)
@@ -51,13 +52,38 @@ def main():
         buttons = UserFirstCommand
 
     if text:     
-        if text.split(" ")[0] in ["посчитай"]:
-            product = product = text.split("посчитай")[1].lower().strip()
-            info = InfoProduct(product)
-            response_text = info.beautiful_text()
+        #if text.split(" ")[0] in ["посчитай"]:
+        if "расскажи про" in text or "что насчёт" in text or "посчитай" in text:
+            #product = text.split("посчитай")[1].lower().strip()
+            #product = text.replace("расскажи про", "").replace("посчитай", "").replace("что насчёт", "").strip()
             
-            ##Если пользователь вводит "чай" т.е., то что предлагает навык впервые
-            if product == "чай" and not users_first_command[user_id]: 
+            product = ""
+            if "расскажи про" in text:
+                product = "".join(text.replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "").split("расскажи про")[text.index("")+1].split())
+            elif "что насчёт" in text:
+                product = "".join(text.split("что насчёт")[text.index("")+1].split()).replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "")
+            elif "как насчёт" in text:
+                product = "".join(text.split("как насчёт")[text.index("")+1].split()).replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "")
+            elif "посчитай" in text:
+                product = "".join(text.split("посчитай")[text.index("")+1].split()).replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "")
+            
+            ##Проверка на то, был ли введён продукт
+            if len(product) != 0: ##Т.е., product != ""
+                info = InfoProduct(product)
+                response_text = info.beautiful_text()
+            else:
+                response_text = "Эй, надо же сказать и продукт!"
+                
+            ##Если айди пользователя нет в словаре
+            if user_id not in users_first_command:
+                #first_start = True
+                title_card = "Эгей, тебя давно не было в \"ИнфоЕде\"!"
+                response_text = "Навык \"ИнфоЕд\" успешно запущен, теперь ты можешь узнать пищевую ценность (содержание белков, жиров, углеводов, калорий) большинства продуктов!\nДля этого используй команду \"Посчитай\" и скажи название продукта.\nНапример: посчитай чай"
+            
+                users_first_command[user_id] = False ##Ставим в словаре с ключом айди то, что пользователь не написал первую команду
+
+            ##Если пользователь вводит впервые
+            elif not users_first_command[user_id]: 
                 ##Сделаем response_text для пользователя, который ввёл предложенную сначала команду
                 response_text = "Молодец, у тебя круто получается!\n\n" + response_text + "\n\nЧтобы получить доступ к моим другим командам - используй команду \"Больше\""
                 users_first_command[user_id] = True ##Ставим использование первой команды пользователем в True, дабы не писать более "Молодец!"
@@ -87,10 +113,11 @@ def main():
 
         ##Если пользователь уже был в навыке и вводил первую команду  
         elif user_id in users_first_command and users_first_command[user_id] == True:
-            title = "Инфоеда успешно запущен!"
+            #title = "Инфоеда успешно запущен!"
             response_text = f"И снова здравствуй!\nЧтобы узнать пищевую ценность - вводи команду \"Посчитай\" и название продукта (например: посчитай чай).Хочешь узнать больше о навыке - вводи команду \"Больше\"."
             buttons = DefaultButtons
-
+    
+    if not users_first_command[user_id]:
         ##Ответ при первом запуске
         response = {
                 "response": {
