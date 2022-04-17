@@ -69,10 +69,10 @@ def main():
             buttons = OnlyExitButton
 
         elif text in HelloWords: ##Если пользователь приветствует
-            response_text = random.choice(HelloWords)
+            response_text = random.choice(HelloWords).title()
 
         elif text in ExitWords: ##Если пользователь прощается
-            response_text = random.choice(LeaveWords)
+            response_text = random.choice(LeaveWords).title()
             end = True
     else:
         title_card = "Инфоеда успешно запущен!"
@@ -84,12 +84,11 @@ def main():
             users_first_command[user_id] = False ##Ставим в словаре с ключом айди то, что пользователь не написал первую команду
             print(f"Пользователь с айди: {user_id}\n{users_first_command[user_id]}")
 
-            ##Тело ответа при первом посещении пользователя навыка
 
         ##Если пользователь уже был в навыке и вводил первую команду  
         elif user_id in users_first_command and users_first_command[user_id] == True:
             title = "Инфоеда успешно запущен!"
-            response_text = f"И снова здравствуй!\nЧтобы узнать пищевую ценность - вводи команду \"Посчитай\" и название продукта.Хочешь узнать больше о навыке - вводи команду \"Больше\"."
+            response_text = f"И снова здравствуй!\nЧтобы узнать пищевую ценность - вводи команду \"Посчитай\" и название продукта (например: посчитай чай).Хочешь узнать больше о навыке - вводи команду \"Больше\"."
             buttons = DefaultButtons
 
         ##Ответ при первом запуске
