@@ -58,13 +58,7 @@ class ProductSearch():
             with open('products.csv') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
-
-                    if best_product is None:
-                        best_product = row["Продукт"]
-                        best_value = abs(float(row[category.lower().title()]) - value)
-                        best_value_of_category = float(row[category.lower().title()])
-                            
-                    if abs(float(row[category.lower().title()]) - value) < best_value:
+                    if (abs(float(row[category.lower().title()]) - value) < best_value) or (best_product is None):
                         best_product = row["Продукт"]
                         best_value = abs(float(row[category.lower().title()]) - value)
                         best_value_of_category = float(row[category.lower().title()])
@@ -84,21 +78,9 @@ class ProductSearch():
             with open('products.csv') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
-
-                    if best_product is None:
+                    if (best_product is None) or (limit.lower() == "max" and float(best_value) < float(row[category.lower().title()])) or (limit.lower() == "min" and float(best_value) > float(row[category.lower().title()])):
                         best_product = row["Продукт"]
                         best_value = float(row[category.lower().title()])
-                        print(best_product)
-                    
-                    elif limit.lower() == "max" and float(best_value) < float(row[category.lower().title()]):
-                        best_product = row["Продукт"]
-                        best_value = float(row[category.lower().title()])
-
-                    elif limit.lower() == "min" and float(best_value) > float(row[category.lower().title()]):
-                        best_product = row["Продукт"]
-                        best_value = float(row[category.lower().title()])
-                        
             return [best_product, best_value]
-        
         else:
             return ["Указанной категории не существует или указанный лимит неверный", 0]
