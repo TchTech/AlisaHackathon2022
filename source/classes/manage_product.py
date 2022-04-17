@@ -33,3 +33,62 @@ class InfoProduct():
 
     def beautiful_text(self) -> str:
         	return  f"В продукте \"{self.name}\" содержится:\n•Белков: {self.proteins}\n•Жиров: {self.fats}\n•Углеводов: {self.carbohydrates}\n•Калорий: {self.calories}"
+
+        
+        
+class ProductSearch():
+    list_of_categories = ["Белки", "Жиры", "Углеводы", "Калории"]
+    list_of_limits = ["min", "max"]
+                    
+    def search_by_value(self, value:float, category:str = "Калории") -> list:
+
+        if category.lower().title() in self.list_of_categories:
+            best_value: float = None
+            best_product: str = None
+            best_value_of_category: float = None
+
+            with open('products.csv') as csvfile:
+                reader = csv.DictReader(csvfile)
+
+                for row in reader:
+
+                    if best_product is None:
+                        best_product = row["Продукт"]
+                        best_value = abs(float(row[category.lower().title()]) - value)
+                        best_value_of_category = float(row[category.lower().title()])
+                            
+                    if abs(float(row[category.lower().title()]) - value) < best_value:
+                        best_product = row["Продукт"]
+                        best_value = abs(float(row[category.lower().title()]) - value)
+                        best_value_of_category = float(row[category.lower().title()])
+                                
+            return [best_product, best_value_of_category]
+
+        else:
+            return ["Категория не найдена!", 0]
+
+    def search_by_limit(self, limit:str = "max", category:str = "Калории") -> list:
+        if category.lower().title() in self.list_of_categories and limit.lower() in self.list_of_limits:
+            best_product: str = None
+            best_value: float = None
+            with open('products.csv') as csvfile:
+                reader = csv.DictReader(csvfile)
+
+                for row in reader:
+
+                    if best_product is None:
+                        best_product = row["Продукт"]
+                        best_value = float(row[category.lower().title()])
+                        print(best_product)
+                    
+                    elif limit.lower() == "max" and float(best_value) < float(row[category.lower().title()]):
+                        best_product = row["Продукт"]
+                        best_value = float(row[category.lower().title()])
+
+                    elif limit.lower() == "min" and float(best_value) > float(row[category.lower().title()]):
+                        best_product = row["Продукт"]
+                        best_value = float(row[category.lower().title()])
+                        
+            return [best_product, best_value]
+        else:
+            return ["Указанной категории не существует или указанный лимит неверный", 0]
