@@ -10,6 +10,8 @@ class InfoProduct():
     calories: float = None #Калории
     
     def __init__(self, product: str): #Инициализация объекта (конструктор)
+        self.user_product = product ##Далее будет использовано в методе .beautiful_text()
+        
         with open('products.csv') as csvfile:
             reader = csv.DictReader(csvfile) 
             for row in reader: 
@@ -33,8 +35,10 @@ class InfoProduct():
         } 
 
     def beautiful_text(self) -> str:
-        return  f"В продукте \"{self.name}\" содержится:\n•Белков: {self.proteins}\n•Жиров: {self.fats}\n•Углеводов: {self.carbohydrates}\n•Калорий: {self.calories}"
-
+        if None not in (self.name, self.proteins, self.fats, self.carbohydrates, self.calories):
+            return  f"В продукте \"{self.name}\" содержится:\n•Белков: {self.proteins}\n•Жиров: {self.fats}\n•Углеводов: {self.carbohydrates}\n•Калорий: {self.calories}"
+        else:
+            return f"Продукт \"{self.user_product}\" не найден..."
         
         
 class ProductSearch():
