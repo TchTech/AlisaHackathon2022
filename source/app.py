@@ -1,10 +1,15 @@
 from flask import Flask, request
 import random
 import csv
+from classes.manage_words import JsonManager
 from classes.manage_product import InfoProduct
 
 ##WSGI - приложение
 app = Flask(__name__)
+
+##Создание jsona
+instance = JsonManager("words.json")
+json = instanse.json_object
 
 ##Наборы приветствий, прощаний и т.д.
 HelloWords = ["привет", "приветствую", "прив", "приветик", "привит", "здравствуйте", "здравствуй", "зравия желаю", "здарова"]
