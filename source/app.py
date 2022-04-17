@@ -1,25 +1,34 @@
 from flask import Flask, request
 import random
 import csv
+from classes.manage_words import JsonManager
 from classes.manage_product import InfoProduct
 
 ##WSGI - приложение
 app = Flask(__name__)
 
+##Создание jsona
+json = JsonManager("words.json")
+phrases_json = json.json_object["Phrases"]
+buttons_json = json.json_object["Buttons"]
+
 ##Наборы приветствий, прощаний и т.д.
-HelloWords = ["привет", "приветствую", "прив", "приветик", "привит", "здравствуйте", "здравствуй", "зравия желаю", "здарова"]
-ExitWords = ["выход", "выключись", "пока", "прощай", "как меня зовут", "переведи на английский"] ##Фразы при которых Алиса выйдет из сессии
-LeaveWords = ["Выключаюсь...", "Выключаю навык \"ИнфоЕд\"", "Выходим из \"Инфоеда\""] ##Фразы которые Алиса скажет когда выключит навык
+HelloWords = phrases_json["HelloWords"] = ["привет", "приветствую", "прив", "приветик", "привит", "здравствуйте", "здравствуй", "зравия желаю", "здарова"]
+ExitWords = phrases_json["ExitWords"] = ["выход", "выключись", "пока", "прощай", "как меня зовут", "переведи на английский"] ##Фразы при которых Алиса выйдет из сессии
+LeaveWords = phrases_json["LeaveWords"] = ["Выключаюсь...", "Выключаю навык \"ИнфоЕд\"", "Выходим из \"Инфоеда\""] ##Фразы которые Алиса скажет когда выключит навык
 
 ##Разные наборы кнопок
-EmptyButtons = []
-UserFirstCommand = [{"title": "Посчитай чай", "hide": True}]
-OnlyExitButton = [{"title": "Выход", "hide": True}]
-OnlyMoreButton = [{"title": "Больше", "hide": True}]
-DefaultButtons = [
+EmptyButtons = buttons_json["EmptyButtons"] = []
+UserFirstCommand = buttons_json["UserFirstCommand"] = [{"title": "Посчитай чай", "hide": True}]
+OnlyExitButton = buttons_json["OnlyExitButton"] = [{"title": "Выход", "hide": True}]
+OnlyMoreButton = buttons_json["OnlyMoreButton"] = [{"title": "Больше", "hide": True}]
+DefaultButtons = buttons_json["DefaultButtons"] = [
     {"title": "Больше", "hide": True},
     {"title": "Выход", "hide": True}
 ]
+
+##Сохранение наборов
+json.save()
 
 ##Первые команды пользователей
 users_first_command = {}
