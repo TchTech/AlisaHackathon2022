@@ -41,6 +41,7 @@ def main():
     version = req["version"] ##Версия (алисы)
     user_id = req["session"]["user_id"] ##id пользователя
     #first_start = False
+    meet_again = False
 
     response_text = text
     end = False ##Выходим из навыка (True/False)
@@ -59,13 +60,13 @@ def main():
             
             product = ""
             if "расскажи про" in text:
-                product = "".join(text.replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "").split("расскажи про")[text.index("")+1].split())
+                product = " ".join(text.replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "").split("расскажи про")[text.index("")+1].split())
             elif "что насчёт" in text:
-                product = "".join(text.split("что насчёт")[text.index("")+1].split()).replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "")
+                product = " ".join(text.replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "").split("что насчёт")[text.index("")+1].split())
             elif "как насчёт" in text:
-                product = "".join(text.split("как насчёт")[text.index("")+1].split()).replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "")
+                product = " ".join(text.replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "").split("как насчёт")[text.index("")+1].split())
             elif "посчитай" in text:
-                product = "".join(text.split("посчитай")[text.index("")+1].split()).replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "")
+                product = " ".join(text.replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "").split("посчитай")[text.index("")+1].split())
             
             ##Проверка на то, был ли введён продукт
             if len(product) != 0: ##Т.е., product != ""
@@ -116,8 +117,9 @@ def main():
             #title = "Инфоеда успешно запущен!"
             response_text = f"И снова здравствуй!\nЧтобы узнать пищевую ценность - вводи команду \"Посчитай\" и название продукта (например: посчитай чай).Хочешь узнать больше о навыке - вводи команду \"Больше\"."
             buttons = DefaultButtons
+            meet_again = True
     
-    if not users_first_command[user_id]:
+    if not users_first_command[user_id] or meet_again:
         ##Ответ при первом запуске
         response = {
                 "response": {

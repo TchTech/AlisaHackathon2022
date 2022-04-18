@@ -1,4 +1,5 @@
 import csv
+import pymorphy2
 
 ##Класс с информацией о продукте
 class InfoProduct():
@@ -11,12 +12,14 @@ class InfoProduct():
     calories: float = None #Калории
     
     def __init__(self, product: str): #Инициализация объекта (конструктор)
-        self.user_product = product ##Далее будет использовано в методе .beautiful_text()
+        self.user_product = self.__go_to_nominative(product) ##Далее будет использовано в методе .beautiful_text()
         
         with open('products.csv') as csvfile:
             reader = csv.DictReader(csvfile) 
-            for row in reader: 
-                if product.lower() in row["Продукт"].split(" ")[0]:
+            for row in reader:
+                #for i in row["Продукт"].split():
+                    #if product == i:
+                if self.user_product.lower() in row["Продукт"].split(" ")[0]:
                     self.name = row["Продукт"]
                     self.weight = row["Вес (г)"]
                     self.proteins = row["Белки"]
@@ -25,6 +28,19 @@ class InfoProduct():
                     self.calories = row["Калории"]
                     #self.category = row["Категория"]
                     break
+
+    ##Метод возвращающий слово в именительном падеже
+    def __go_to_nominative(self, word_to_nominative):
+        morph = pymorphy2.MorphAnalyzer()
+        new_word_construct = []
+
+        ##Цикл для того, чтобы все слова в продукте перевести в именительный падеж
+        for i in word_to_nominative.split(" "):
+            word = morph.parse(i)[0]
+            new_word = word.inflect({'nomn'}) ##Переводим слово из косвенного падежа в именительный
+            new_word_construct.append(new_word.word)
+
+        return " ".join(new_word_construct) ##Возвращаем слово в именительном падеже
 
     def get_json(self) -> dict: #Метод, создающий json с полями класса
         return {
