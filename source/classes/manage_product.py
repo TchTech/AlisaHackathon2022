@@ -53,9 +53,10 @@ class InfoProduct():
             #"Категория" : self.category
         } 
 
+    ##Метод для красивого вывода текста или уведомления о ненаходе продукта
     def beautiful_text(self) -> str:
         if None not in (self.name, self.proteins, self.fats, self.carbohydrates, self.calories):
-            return  f"В продукте \"{self.name}\" на {self.weight} грамм содержится:\n•Белков: {self.proteins} грамм\n•Жиров: {self.fats} грамм\n•Углеводов: {self.carbohydrates} грамм\n•Калорий: {self.calories} ккал"
+            return  f"В продукте \"{self.name}\" на {self.weight} грамм содержится:\n• Белков: {self.proteins} грамм\n• Жиров: {self.fats} грамм\n• Углеводов: {self.carbohydrates} грамм\n• Калорий: {self.calories} ккал"
         else:
             return f"Продукт \"{self.user_product}\" не найден..."
         
