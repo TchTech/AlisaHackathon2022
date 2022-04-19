@@ -12,14 +12,14 @@ class InfoProduct():
     calories: float = None #Калории
     
     def __init__(self, product: str): #Инициализация объекта (конструктор)
-        self.user_product = self.__go_to_nominative(product) ##Далее будет использовано в методе .beautiful_text()
+        self.user_product = self.__go_to_nominative(product.lower()) ##Далее будет использовано в методе .beautiful_text()
         
         with open('products.csv') as csvfile:
             reader = csv.DictReader(csvfile) 
             for row in reader:
                 #for i in row["Продукт"].split():
                     #if product == i:
-                if self.user_product.lower() in row["Продукт"].split(" ")[0]:
+                if self.__IsAlike(self.user_product, row["Продукт"]):
                     self.name = row["Продукт"]
                     self.weight = row["Вес (г)"]
                     self.proteins = row["Белки"]
@@ -28,6 +28,18 @@ class InfoProduct():
                     self.calories = row["Калории"]
                     #self.category = row["Категория"]
                     break
+
+            if self.name is None:
+                for row in reader:
+                    if self.user_product.lower() in row["Продукт"].split(" ")[0] or self.user_product.lower() in row["Продукт"]:
+                        self.name = row["Продукт"]
+                        self.weight = row["Вес (г)"]
+                        self.proteins = row["Белки"]
+                        self.fats = row["Жиры"]
+                        self.carbohydrates = row["Углеводы"]
+                        self.calories = row["Калории"]
+                        #self.category = row["Категория"]
+                        break
 
     ##Метод возвращающий слово в именительном падеже
     def __go_to_nominative(self, word_to_nominative):
