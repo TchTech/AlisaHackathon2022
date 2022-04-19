@@ -12,23 +12,49 @@ class InfoProduct():
     calories: float = None #Калории
     
     def __init__(self, product: str): #Инициализация объекта (конструктор)
-        self.user_product = self.__go_to_nominative(product) ##Далее будет использовано в методе .beautiful_text()
+        self.user_product = self.__go_to_nominative(product.lower()) ##Далее будет использовано в методе .beautiful_text()
         
         with open('products.csv') as csvfile:
             reader = csv.DictReader(csvfile) 
             for row in reader:
                 #for i in row["Продукт"].split():
                     #if product == i:
-                if self.user_product.lower() in row["Продукт"].split(" ")[0]:
+            
+                if self.__IsAlike(self.user_product, row["Продукт"]):
                     self.name = row["Продукт"]
                     self.weight = row["Вес (г)"]
                     self.proteins = row["Белки"]
                     self.fats = row["Жиры"]
                     self.carbohydrates = row["Углеводы"]
                     self.calories = row["Калории"]
-                    self.category = row["Категория"]
+                    #self.category = row["Категория"]
                     break
 
+            if self.name is None:
+                for row in reader:
+                    if self.user_product.lower() in row["Продукт"].split(" ")[0] or self.user_product.lower() in row["Продукт"]:
+                        self.name = row["Продукт"]
+                        self.weight = row["Вес (г)"]
+                        self.proteins = row["Белки"]
+                        self.fats = row["Жиры"]
+                        self.carbohydrates = row["Углеводы"]
+                        self.calories = row["Калории"]
+                        #self.category = row["Категория"]
+                        break
+    
+    def __IsAlike(self, userinput: str, product: str) -> bool:
+    
+        _userinput_arr = userinput.lower().split(" ")
+        _product_arr = product.lower().split(" ")
+    
+        for i in _userinput_arr:
+            if i in _product_arr:
+                continue
+            else:
+                return False
+    
+        return True
+    
     ##Метод возвращающий слово в именительном падеже
     def __go_to_nominative(self, word_to_nominative):
         morph = pymorphy2.MorphAnalyzer()
@@ -38,9 +64,12 @@ class InfoProduct():
         for i in word_to_nominative.split(" "):
             word = morph.parse(i)[0]
             new_word = word.inflect({'nomn'}) ##Переводим слово из косвенного падежа в именительный
-            new_word_construct.append(new_word.word)
+            if new_word is None:
+                return word_to_nominative
+            else:
+                new_word_construct.append(new_word.word)
 
-        return " ".join(new_word_construct) ##Возвращаем слово в именительном падеже
+        return " ".join(new_word_construct).replace("ё", "е") ##Возвращаем слово в именительном падеже
 
     def get_json(self) -> dict: #Метод, создающий json с полями класса
         return {
@@ -50,13 +79,13 @@ class InfoProduct():
             "Жиры" : self.fats,
             "Углеводы" : self.carbohydrates,
             "Калории" : self.calories,
-            "Категория" : self.category
+            #"Категория" : self.category
         } 
 
     ##Метод для красивого вывода текста или уведомления о ненаходе продукта
     def beautiful_text(self) -> str:
         if None not in (self.name, self.proteins, self.fats, self.carbohydrates, self.calories):
-            return  f"В продукте \"{self.name}\" на {self.weight} грамм содержится:\n• Белков: {self.proteins} грамм\n• Жиров: {self.fats} грамм\n• Углеводов: {self.carbohydrates} грамм\n• Калорий: {self.calories} ккал\n• Категория: {self.category}"
+            return  f"В продукте \"{self.name}\" на {self.weight} грамм содержится:\n• Белков: {self.proteins} грамм\n• Жиров: {self.fats} грамм\n• Углеводов: {self.carbohydrates} грамм\n• Калорий: {self.calories} ккал"
         else:
             return f"Продукт \"{self.user_product}\" не найден..."
         
