@@ -63,7 +63,10 @@ class InfoProduct():
         for i in word_to_nominative.split(" "):
             word = morph.parse(i)[0]
             new_word = word.inflect({'nomn'}) ##Переводим слово из косвенного падежа в именительный
-            new_word_construct.append(new_word.word)
+            if new_word is None:
+                return word_to_nominative
+            else:
+                new_word_construct.append(new_word.word)
 
         return " ".join(new_word_construct) ##Возвращаем слово в именительном падеже
 
