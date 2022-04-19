@@ -23,6 +23,7 @@ class Responses:
     
     ##Ответ в виде карточки
     def card_response(self, image_id:str, title_card: str, response_text: str, response_speak: str, buttons: dict):
+        ##Тело ответа
         response = {
                 "response": {
                     "text": response_text,
@@ -33,7 +34,7 @@ class Responses:
                     ##Карточка - блок с картинкой, далее заголовком и текстом
                     "card": {
                         "type":"BigImage",
-                        "image_id": "937455/e1833075f705a4649b2c",
+                        "image_id": image_id,
                         "title": title_card,
                         "description": response_text, ##Алиса будет это отображать в карточке
                     }

@@ -5,6 +5,7 @@ from config import LOGO_IMG_ID
 from classes.manage_words import JsonManager
 from classes.manage_product import InfoProduct
 from classes.responses import Responses
+from classes.manage_words import CorrectString
 
 ##WSGI - приложение
 app = Flask(__name__)
@@ -18,6 +19,10 @@ buttons_json = json.json_object["Buttons"]
 HelloWords = phrases_json["HelloWords"] = ["привет", "приветствую", "прив", "приветик", "привит", "здравствуйте", "здравствуй", "зравия желаю", "здарова"]
 ExitWords = phrases_json["ExitWords"] = ["выход", "выключись", "пока", "прощай", "как меня зовут", "переведи на английский"] ##Фразы при которых Алиса выйдет из сессии
 LeaveWords = phrases_json["LeaveWords"] = ["Выключаюсь...", "Выключаю навык \"ИнфоЕд\"", "Выходим из \"Инфоеда\""] ##Фразы которые Алиса скажет когда выключит навык
+
+##Активирующие слова
+#ActivationWords = ["расскажи про", "посчитай", "рассчитай", "что насчет", "как насчёт"]
+ActivationWords = ["расскажи про", "посчитай", "рассчитай", "что насчёт", "как насчёт"]
 
 ##Разные наборы кнопок
 EmptyButtons = buttons_json["EmptyButtons"] = []
@@ -42,13 +47,13 @@ def main():
     text = req["request"]["command"].lower().strip().replace(",", "").replace(".", "") ##Текст пользователя
     version = req["version"] ##Версия (алисы)
     user_id = req["session"]["user_id"] ##id пользователя
-    #first_start = False
+    end = False ##Выходим из навыка (True/False)
     meet_again = False
 
-
+    ##Переменные для пользователя
+    title_card = "ИнфоЕда"
     response_text = text ##Текст ответа на письме
     response_speak = response_text ##Голосовой текст ответа
-    end = False ##Выходим из навыка (True/False)
 
     ##Объект для разных способов ответа
     response_to_alice = Responses(end=end, version=version)
@@ -56,7 +61,6 @@ def main():
     try:
         buttons = DefaultButtons if users_first_command[user_id] == True else UserFirstCommand
     except Exception as err: ##Ошибка будет ловиться если нет ключа с таким айди. Такого ключа может не быть при первом запуске пользователем навыка
-        print(err)
         buttons = UserFirstCommand
 
     if text:     
@@ -69,21 +73,10 @@ def main():
 
             users_first_command[user_id] = False ##Ставим в словаре с ключом айди то, что пользователь не написал первую команду
 
-        #if text.split(" ")[0] in ["посчитай"]:
-        if "расскажи про" in text or "что насчёт" in text or "посчитай" in text:
-            #product = text.split("посчитай")[1].lower().strip()
-            #product = text.replace("расскажи про", "").replace("посчитай", "").replace("что насчёт", "").strip()
-            
-            product = ""
-            if "расскажи про" in text:
-                product = " ".join(text.replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "").split("расскажи про")[text.index("")+1].split())
-            elif "что насчёт" in text:
-                product = " ".join(text.replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "").split("что насчёт")[text.index("")+1].split())
-            elif "как насчёт" in text:
-                product = " ".join(text.replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "").split("как насчёт")[text.index("")+1].split())
-            elif "посчитай" in text:
-                product = " ".join(text.replace("пожалуйста", "").replace("алиса", "").replace("инфоед", "").replace("инфоеда", "").split("посчитай")[text.index("")+1].split())
-            
+        ##Делаем условие, что активационные слова есть в тексте
+        if ("расскажи" in text and "про" in text) or ("что" in text or "как" in text and "насчёт" in text) or ("посчитай" in text) or ("рассчитай" in text): 
+            product = CorrectString(text).remove_other_words(ActivationWords)
+
             ##Проверка на то, был ли введён продукт
             if len(product) != 0: ##Т.е., product != ""
                 info = InfoProduct(product)
@@ -130,7 +123,7 @@ def main():
 
         ##Если пользователь уже был в навыке и вводил первую команду  
         elif user_id in users_first_command and users_first_command[user_id] == True:
-            #title = "Инфоеда успешно запущен!"
+            title_card = "Инфоеда успешно запущен!"
             response_text = f"И снова здравствуй!\nЧтобы узнать пищевую ценность - вводи команду \"Расскажи про\" и название продукта (например: расскажи про чай). \nХочешь узнать больше о моих возможностях - вводи команду \"Помощь\"."
             response_speak = f"И снова здравствуй!\nЧтобы узнать пищевую ценность - вводи команду \"Расскажи пр+о\" и название продукта (например: расскажи пр+о чай). \nХочешь узнать больше о моих возможностях - вводи команду \"Помощь\"."
             buttons = DefaultButtons
