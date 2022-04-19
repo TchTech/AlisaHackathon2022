@@ -40,7 +40,20 @@ class InfoProduct():
                         self.calories = row["Калории"]
                         #self.category = row["Категория"]
                         break
-
+    
+    def __IsAlike(self, userinput: str, product: str) -> bool:
+    
+        _userinput_arr = userinput.lower().split(" ")
+        _product_arr = product.lower().split(" ")
+    
+        for i in _userinput_arr:
+            if i in _product_arr:
+                continue
+            else:
+                return False
+    
+        return True
+    
     ##Метод возвращающий слово в именительном падеже
     def __go_to_nominative(self, word_to_nominative):
         morph = pymorphy2.MorphAnalyzer()
