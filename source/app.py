@@ -41,7 +41,10 @@ DefaultButtons = buttons_json["DefaultButtons"] = [
 json.save()
 
 ##Первые команды пользователей
-users_first_command = {}
+users_first_command = {}  ##Ключ - айди пользователя; Значение - True/False (была использована пользователем команда или нет)
+
+##Стоп-лист
+users_stop_list_products = {} ##Ключ - айди пользователя; Значение - список с названиями продуктов
 
 ##Обработчик куда алиса пришлёт ответ, а мы станем отвечать на него
 @app.route("/", methods=["POST"])
@@ -83,22 +86,30 @@ def main():
 
             ##Проверка на то, был ли введён продукт
             if len(product) != 0: ##Т.е., product != ""
-                info = InfoProduct(product) ##Инициализируем объект класса, в котором будет храниться вся информация о продукте
+                info = InfoProduct(product, users_stop_list_products[user_id]) ##Инициализируем объект класса, в котором будет храниться вся информация о продукте
                 
                 title_card = info.user_product.split()[0].title() + " " + " ".join(info.user_product.split()[1::]) + f"({info.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
-            
+
                 response_text = info.beautiful_text()[0] ##.beautiful_text возвращает кортеж, нулевой элемент - письменный текст
-                response_speak = info.beautiful_text()[1] ##первый элемент - голосовой текст
+                response_speak = info.beautiful_text()[1] ##Первый элемент - голосовой текст
                 response_img = info.get_product_img()  ##Получаем картинку продукта
+                users_stop_list_products[user_id] = info.stop_list ##Получаем стоп-лист от атрибута класса
+
+                ##Проверим на предел вместимости стоп-листа (5 элементов)
+                if len(users_stop_list_products[user_id]) >= 5:
+                    users_stop_list_products[user_id] = [] ##Если больше 5 элементов было в стоп-листе - очищаем его
+                else: ##Иначе - добавляем очередной продукт от пользователя к стоп-листу
+                    if info.name not in users_stop_list_products[user_id]: ##Если такого продукта нет в стоп-листе
+                        users_stop_list_products[user_id] = users_stop_list_products[user_id] + [*[info.name]]
     
-                ##Если пользователь вводит впервые и продукт был найден
+                ##Если пользователь вводит команду впервые и продукт был найден
                 if not users_first_command[user_id] and info.name != None:
                     ##Сделаем response_speak для пользователя, который ввёл свою первую команду
                     response_speak = "Молодец, у тебя круто получается!\n\n" + response_speak + "\n\nХочешь узнать больше о моих возможностях - вводи команду \"Помощь\"."
 
                     users_first_command[user_id] = True ##Ставим использование первой команды пользователем в True, дабы не писать более "Молодец!"
                     buttons = DefaultButtons
-                    print(f"Пользователь с айди: {user_id}\n{users_first_command[user_id]}")
+                    #(f"Пользователь с айди: {user_id}\n{users_first_command[user_id]}")
 
                 ##Если продукт не был найден
                 if info.name == None:
@@ -113,7 +124,6 @@ def main():
 
 
         elif text.split(" ")[0] in ["помощь"]: ##Если пользователь хочет узнать больше информации о командах
-            print("ПРОШУ ПОМОЩЬ!!!")
             response_text = "Я умею:\n• Считать пищевую ценность продукта при помощи команды \"Расскажи про\" (расскажи про чай)"
             response_speak = "Я умею:\nпервое. Считать пищевую ценность продукта при помощи команды \"Расскажи пр+о\"\n•\n•\n•"
             buttons = [] ##Пользователь уже в помощи, поэтому кнопки оставляем пустыми
@@ -139,7 +149,9 @@ def main():
             response_img = LOGO_IMG_ID ##Это первый ввод команты пользователем и поэтому отслылаем карточку с логотипом
 
             users_first_command[user_id] = False ##Ставим в словаре с ключом айди то, что пользователь не написал первую команду
-            print(f"Пользователь с айди: {user_id}\n{users_first_command[user_id]}")
+            users_stop_list_products[user_id] = [] ##В значение стоп листа стави пустой список, дабы потом в него осуществлять добавку при вводе пользователем продуктов
+
+            #print(f"Пользователь с айди: {user_id}\n{users_first_command[user_id]}")
 
         ##Если пользователь уже был в навыке и вводил первую команду (грубо говоря, если пользователь очистил диалоговое окно с навыком)
         elif user_id in users_first_command and users_first_command[user_id] == True:
