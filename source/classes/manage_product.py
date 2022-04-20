@@ -1,5 +1,6 @@
 import csv
 import pymorphy2
+import random
 from config import category_imgs_id
 
 ##Класс с информацией о продукте
@@ -104,33 +105,45 @@ class InfoProduct():
 ##Класс для поиска продукта по определённым характеристикам
 class ProductSearch():
     
-    list_of_categories = ["Белки", "Жиры", "Углеводы", "Калории"]
+    list_of_titles = ["Белки", "Жиры", "Углеводы", "Калории"]
+    list_of_categories = ["грибы", "колбасы", "крупы и каши", "масла и жиры", "молочные продукты", "мука и мучные изделия", "мясные продукты", "овощи и зелень", "орехи и сухофрукты", "рыба и морепродукты", "снэки, сыры и творог", "сырье и приправы", "фрукты, ягоды", "яйца", "кондитерские изделия и сладости", "мороженое, торты", "шоколад", "напитки алкогольные", "напитки безалкогольные", "соки и компоты", "салаты, первые блюда", "фастфуд, японская кухня", "детское питание", "спортивное питание"]
     list_of_limits = ["min", "max"]
-                    
-    def search_by_value(self, value:float, category:str = "Калории") -> list:
 
-        if category.lower().title() in self.list_of_categories:
+    def random_product_by_category(self, category: str) -> str:
+        if category.lower() in self.list_of_categories:
+            list_by_category = []
+
+            with open('products.csv') as csvfile:
+                reader = csv.DictReader(csvfile)
+
+                for row in reader:
+                    if row["Категория"] == category:
+                        list_by_category.append(row["Продукт"])
+
+            return random.choice(list_by_category)
+                    
+    def search_by_value(self, value:float, title:str = "Калории") -> list:
+
+        if title.lower().title() in self.list_of_titles:
             
             best_value: float = None
             best_product: str = None
-            best_value_of_category: float = None
+            best_value_of_title: float = None
 
             with open('products.csv') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
-                    if (abs(float(row[category.lower().title()]) - value) < best_value) or (best_product is None):
+                    if (abs(float(row[title.lower().title()]) - value) < best_value) or (best_product is None):
                         best_product = row["Продукт"]
-                        best_value = abs(float(row[category.lower().title()]) - value)
-                        best_value_of_category = float(row[category.lower().title()])
+                        best_value = abs(float(row[title.lower().title()]) - value)
+                        best_value_of_title = float(row[title.lower().title()])
                                 
-            return [best_product, best_value_of_category]
+            return [best_product, best_value_of_title]
 
-        else:
-            return ["Категория не найдена!", 0]
 
-    def search_by_limit(self, limit:str = "max", category:str = "Калории") -> list:
+    def search_by_limit(self, limit:str = "max", title:str = "Калории") -> list:
         
-        if category.lower().title() in self.list_of_categories and limit.lower() in self.list_of_limits:
+        if title.lower().title() in self.list_of_titles and limit.lower() in self.list_of_limits:
             
             best_product: str = None
             best_value: float = None
@@ -138,9 +151,7 @@ class ProductSearch():
             with open('products.csv') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
-                    if (best_product is None) or (limit.lower() == "max" and float(best_value) < float(row[category.lower().title()])) or (limit.lower() == "min" and float(best_value) > float(row[category.lower().title()])):
+                    if (best_product is None) or (limit.lower() == "max" and float(best_value) < float(row[title.lower().title()])) or (limit.lower() == "min" and float(best_value) > float(row[title.lower().title()])):
                         best_product = row["Продукт"]
-                        best_value = float(row[category.lower().title()])
+                        best_value = float(row[title.lower().title()])
             return [best_product, best_value]
-        else:
-            return ["Указанной категории не существует или указанный лимит неверный", 0]
