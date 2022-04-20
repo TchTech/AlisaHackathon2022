@@ -1,5 +1,6 @@
 import csv
 import pymorphy2
+from config import category_imgs_id
 
 ##Класс с информацией о продукте
 class InfoProduct():
@@ -10,6 +11,8 @@ class InfoProduct():
     fats: float = None #Жиры
     carbohydrates: float = None #Углеводы
     calories: float = None #Калории
+    category: str = None ##Категория
+    product_img: str = None ##Картинка
     
     def __init__(self, product: str): #Инициализация объекта (конструктор)
         self.user_product = self.__go_to_nominative(product.lower()) ##Далее будет использовано в методе .beautiful_text()
@@ -27,7 +30,10 @@ class InfoProduct():
                     self.fats = row["Жиры"]
                     self.carbohydrates = row["Углеводы"]
                     self.calories = row["Калории"]
-                    #self.category = row["Категория"]
+                    self.category = row["Категория"]
+
+                    ##Картинка категории для отображения в карточке
+                    self.product_img = category_imgs_id[self.category.lower()]
                     break
 
             if self.name is None:
@@ -39,7 +45,7 @@ class InfoProduct():
                         self.fats = row["Жиры"]
                         self.carbohydrates = row["Углеводы"]
                         self.calories = row["Калории"]
-                        #self.category = row["Категория"]
+                        self.category = row["Категория"]
                         break
     
     def __IsAlike(self, userinput: str, product: str) -> bool:
@@ -79,15 +85,21 @@ class InfoProduct():
             "Жиры" : self.fats,
             "Углеводы" : self.carbohydrates,
             "Калории" : self.calories,
-            #"Категория" : self.category
+            "Категория" : self.category
         } 
 
     ##Метод для красивого вывода текста или уведомления о ненаходе продукта
     def beautiful_text(self) -> str:
-        if None not in (self.name, self.proteins, self.fats, self.carbohydrates, self.calories):
-            return  f"В продукте \"{self.name}\" на {self.weight} грамм содержится:\n• Белков: {self.proteins} грамм\n• Жиров: {self.fats} грамм\n• Углеводов: {self.carbohydrates} грамм\n• Калорий: {self.calories} ккал"
+        if None not in (self.name, self.proteins, self.fats, self.carbohydrates, self.calories, self.category):
+            return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""",
+                    f"""В продукте \"{self.user_product}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""")
         else:
-            return f"Продукт \"{self.user_product}\" не найден..."
+            return (f"Продукт \"{self.user_product}\" не найден...\nВы можете отправить отчёт об ошибке с помощью команды \"Ошибка\"",
+                    f"Продукт \"{self.user_product}\ не найден, но вы можете отправить отчёт об ошибке с помощью команды \"Ошибка\"")
+    
+    ##Метод для возврата айди картинки
+    def get_product_img(self):
+        return self.product_img
         
 ##Класс для поиска продукта по определённым характеристикам
 class ProductSearch():

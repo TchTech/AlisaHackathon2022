@@ -1,7 +1,7 @@
 from flask import Flask, request
 import random
 import csv
-from config import LOGO_IMG_ID
+from config import LOGO_IMG_ID, ERROR_IMG_ID
 from classes.manage_words import JsonManager
 from classes.manage_product import InfoProduct
 from classes.responses import Responses
@@ -21,14 +21,17 @@ ExitWords = phrases_json["ExitWords"] = ["выход", "выключись", "п
 LeaveWords = phrases_json["LeaveWords"] = ["Выключаюсь...", "Выключаю навык \"ИнфоЕд\"", "Выходим из \"Инфоеда\""] ##Фразы которые Алиса скажет когда выключит навык
 
 ##Активирующие слова
-#ActivationWords = ["расскажи про", "посчитай", "рассчитай", "что насчет", "как насчёт"]
-ActivationWords = ["расскажи про", "посчитай", "рассчитай", "что насчет", "что насчёт", "как насчет", "как насчёт"]
+ActivationWords = phrases_json["ActivationWords"] = ["расскажи про", "скажи про", "посчитай", "рассчитай", "что насчет", "что насчёт", "как насчет", "как насчёт"]
 
 ##Разные наборы кнопок
 EmptyButtons = buttons_json["EmptyButtons"] = []
 UserFirstCommand = buttons_json["UserFirstCommand"] = [{"title": "Расскажи про чай", "hide": True}]
-#OnlyExitButton = buttons_json["OnlyExitButton"] = [{"title": "Выход", "hide": True}]
 OnlyMoreButton = buttons_json["OnlyMoreButton"] = [{"title": "Помощь", "hide": True}]
+OnlyErrorButton = buttons_json["OnlyExitButton"] = [{"title": "Ошибка", "hide": True}]
+MoreAndErrorButtons = buttons_json["MoreAndErrorButtons"] = [
+    {"title": "Ошибка", "hide": True},
+    {"title": "Помощь", "hide": True}
+    ]
 DefaultButtons = buttons_json["DefaultButtons"] = [
     {"title": "Помощь", "hide": True},
     #{"title": "Выход", "hide": True}
@@ -52,8 +55,9 @@ def main():
 
     ##Переменные для пользователя
     title_card = "ИнфоЕда"
-    response_text = text ##Текст ответа на письме
-    response_speak = response_text ##Голосовой текст ответа
+    response_text = "" ##Текст ответа на письме
+    response_speak = "" ##Голосовой текст ответа
+    response_img = None ##Картинка для вставки потом в карточку
 
     ##Объект для разных способов ответа
     response_to_alice = Responses(end=end, version=version)
@@ -64,7 +68,7 @@ def main():
         buttons = UserFirstCommand
 
     if text:     
-        ##Если айди пользователя нет в словаре
+        ##Если айди пользователя нет в словаре, но он всё равно ввел какой-либо текст (т.е., у него УЖЕ было открыто диалоговое окно навыка)
         if user_id not in users_first_command:
             #first_start = True
             title_card = "Эгей, тебя давно не было в \"ИнфоЕде\"!"
@@ -74,33 +78,49 @@ def main():
             users_first_command[user_id] = False ##Ставим в словаре с ключом айди то, что пользователь не написал первую команду
 
         ##Делаем условие, что активационные слова есть в тексте
-        if ("расскажи" in text and "про" in text) or ("что" in text or "как" in text and "насчёт" in text) or ("посчитай" in text) or ("рассчитай" in text): 
+        if ("расскажи" in text and "про" in text) or ("скажи" in text and "про" in text) or ("что" in text or "как" in text and "насчёт" in text) or ("посчитай" in text) or ("рассчитай" in text): 
             product = CorrectString(text).remove_other_words(ActivationWords)
 
             ##Проверка на то, был ли введён продукт
             if len(product) != 0: ##Т.е., product != ""
-                info = InfoProduct(product)
-                response_text = info.beautiful_text()
-                response_speak = response_text
-            else:
+                info = InfoProduct(product) ##Инициализируем объект класса, в котором будет храниться вся информация о продукте
+                
+                title_card = info.user_product.split()[0].title() + " " + " ".join(info.user_product.split()[1::]) + f"({info.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
+            
+                response_text = info.beautiful_text()[0] ##.beautiful_text возвращает кортеж, нулевой элемент - письменный текст
+                response_speak = info.beautiful_text()[1] ##первый элемент - голосовой текст
+                response_img = info.get_product_img()  ##Получаем картинку продукта
+    
+                ##Если пользователь вводит впервые и продукт был найден
+                if not users_first_command[user_id] and info.name != None:
+                    ##Сделаем response_speak для пользователя, который ввёл свою первую команду
+                    response_speak = "Молодец, у тебя круто получается!\n\n" + response_speak + "\n\nХочешь узнать больше о моих возможностях - вводи команду \"Помощь\"."
+
+                    users_first_command[user_id] = True ##Ставим использование первой команды пользователем в True, дабы не писать более "Молодец!"
+                    buttons = DefaultButtons
+                    print(f"Пользователь с айди: {user_id}\n{users_first_command[user_id]}")
+
+                ##Если продукт не был найден
+                if info.name == None:
+                    title_card = "Ошибка"
+                    buttons = MoreAndErrorButtons ##В кнопки ставим "Помощь" и "Ошибка"
+                    #response_img = ERROR_IMG_ID
+                    response_img = None ##Внизу есть проверка и если картинка == None - карточка показываться не будет
+
+            else: ##Если пользователь ввёл только активационное слово
                 response_text = "Эй, надо же сказать и продукт!"
                 response_speak = response_text
-                
-            ##Если пользователь вводит впервые
-            if not users_first_command[user_id]:
-                ##Сделаем response_text для пользователя, который ввёл предложенную сначала команду
-                response_text = "Молодец, у тебя круто получается!\n\n" + response_text + "\n\nХочешь узнать больше о моих возможностях - вводи команду \"Помощь\"."
-                response_speak = response_text
-
-                users_first_command[user_id] = True ##Ставим использование первой команды пользователем в True, дабы не писать более "Молодец!"
-                buttons = DefaultButtons
-                print(f"Пользователь с айди: {user_id}\n{users_first_command[user_id]}")
 
 
-        elif text.split(" ")[0] in ["помощь"] and users_first_command[user_id] == True: ##Если пользователь хочет узнать больше информации о командах
+        elif text.split(" ")[0] in ["помощь"]: ##Если пользователь хочет узнать больше информации о командах
+            print("ПРОШУ ПОМОЩЬ!!!")
             response_text = "Я умею:\n• Считать пищевую ценность продукта при помощи команды \"Расскажи про\" (расскажи про чай)"
             response_speak = "Я умею:\nпервое. Считать пищевую ценность продукта при помощи команды \"Расскажи пр+о\"\n•\n•\n•"
             buttons = [] ##Пользователь уже в помощи, поэтому кнопки оставляем пустыми
+            response_img = None
+
+            ##Отправляем алисе сразу ответ
+            return response_to_alice.simply_response(response_text, response_speak, buttons)
 
         elif text in HelloWords: ##Если пользователь приветствует
             response_text = random.choice(HelloWords).title()
@@ -116,25 +136,31 @@ def main():
             title_card = "Приветствуем тебя в \"ИнфоЕде\"!"
             response_text = "Навык \"ИнфоЕда\" успешно запущен, теперь ты можешь узнать пищевую ценность (содержание белков, жиров, углеводов, калорий) большинства продуктов!\nДля этого используй команду \"Расскажи про\" и скажи название продукта.\nНапример: расскажи про чай"
             response_speak = "Навык \"Инфо+Еда\" успешно запущен, теперь ты можешь узнать пищевую ценность (содержание белков, жиров, углеводов, калорий) большинства продуктов!\nДля этого используй команду \"Расскажи пр+о\" и скажи название продукта.\nНапример: расскажи пр+о чай"
+            response_img = LOGO_IMG_ID ##Это первый ввод команты пользователем и поэтому отслылаем карточку с логотипом
 
             users_first_command[user_id] = False ##Ставим в словаре с ключом айди то, что пользователь не написал первую команду
             print(f"Пользователь с айди: {user_id}\n{users_first_command[user_id]}")
 
-
-        ##Если пользователь уже был в навыке и вводил первую команду  
+        ##Если пользователь уже был в навыке и вводил первую команду (грубо говоря, если пользователь очистил диалоговое окно с навыком)
         elif user_id in users_first_command and users_first_command[user_id] == True:
             title_card = "Инфоеда успешно запущен!"
             response_text = f"И снова здравствуй!\nЧтобы узнать пищевую ценность - вводи команду \"Расскажи про\" и название продукта (например: расскажи про чай). \nХочешь узнать больше о моих возможностях - вводи команду \"Помощь\"."
             response_speak = f"И снова здравствуй!\nЧтобы узнать пищевую ценность - вводи команду \"Расскажи пр+о\" и название продукта (например: расскажи пр+о чай). \nХочешь узнать больше о моих возможностях - вводи команду \"Помощь\"."
             buttons = DefaultButtons
+            response_img = LOGO_IMG_ID
             meet_again = True
     
-    if users_first_command[user_id] == False or meet_again:
+    ##Если пользователь впервые в навыке или если очистил окно с диалогом внутри навыка (за это и отвечает meet_again)
+    if users_first_command[user_id] == False or meet_again and response_img != None:
         ##Ответ при первом запуске     
-        return response_to_alice.card_response(LOGO_IMG_ID, title_card, response_text, response_speak, buttons)
+        return response_to_alice.card_response(response_img, title_card, response_text, response_speak, buttons)
 
-    ##Ответ с помощью объекта response (для полноты смотреть classes -> responses.py -> Responses)
-    return response_to_alice.simply_response(response_text, response_speak, buttons)
+    ##Если картинка не None (если в ответе будет картинка, т.е., ответ подразумевается в виде карточки)
+    if response_img != None:
+        return response_to_alice.card_response(response_img, title_card, response_text, response_speak, buttons)
+    else:
+        ##Ответ с помощью объекта response (для полноты смотреть classes -> responses.py -> Responses)
+        return response_to_alice.simply_response(response_text, response_speak, buttons)
 
 ##Точка входа
 if __name__ == "__main__":

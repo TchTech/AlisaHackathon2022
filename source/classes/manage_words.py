@@ -1,5 +1,5 @@
 import json
-
+import pymorphy2
 
 class JsonManager():
         json_object: dict = None
@@ -44,4 +44,22 @@ class CorrectString:
                 del text[0]
                 text = " ".join(text)
 
+                ##Ставим все слова в тексте в именительный падеж
+                text = self.go_to_nominative(text)
+
                 return text
+
+        def go_to_nominative(self, word_to_nominative):
+                morph = pymorphy2.MorphAnalyzer()
+                new_word_construct = []
+
+                ##Цикл для того, чтобы все слова в продукте перевести в именительный падеж
+                for i in word_to_nominative.split(" "):
+                        word = morph.parse(i)[0]
+                        new_word = word.inflect({'nomn'}) ##Переводим слово из косвенного падежа в именительный
+                        if new_word is None:
+                                return word_to_nominative
+                        else:
+                                new_word_construct.append(new_word.word)
+
+                return " ".join(new_word_construct).replace("ё", "е") ##Возвращаем слово в именительном падеже
