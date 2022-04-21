@@ -6,7 +6,7 @@ from classes.manage_product import InfoProduct
 from classes.manage_product import ProductSearch
 from classes.responses import Responses
 from classes.manage_words import CorrectString
-from classes.emails import EmailSend
+from classes.manage_mails import EmailSend
 from config import EMAIL, PASSWORD
 
 ##WSGI - приложение
