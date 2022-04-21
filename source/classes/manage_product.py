@@ -4,7 +4,7 @@ import random
 from config import category_imgs_id
 
 ##Класс с информацией о продукте
-class InfoProduct():
+class InfoProduct:
     
     name: str = None #Название продукта
     weight: float = None #Вес 
@@ -15,9 +15,11 @@ class InfoProduct():
     category: str = None ##Категория
     product_img: str = None ##Картинка
     
-    def __init__(self, product: str, stop_list): #Инициализация объекта (конструктор)
+    def __init__(self, product: str, stop_list, check=False): #Инициализация объекта (конструктор)
         self.user_product = self.__go_to_nominative(product.lower()) ##Далее будет использовано в методе .beautiful_text()
+        self.user_product = product
         self.stop_list = stop_list
+        print(stop_list, "---")
 
         with open('products.csv') as csvfile:
             reader = csv.DictReader(csvfile) 
@@ -36,10 +38,14 @@ class InfoProduct():
                     break
 
             if self.name is None:
+                print(f"Был не найден продукт: {self.user_product}")
                 self.stop_list = []
 
-                self.__init__(self.user_product, self.stop_list)
+                ##Если мы прошлись только 1 раз
+                if check == False:
+                    self.__init__(self.user_product, self.stop_list, check=True)
 
+                ##Делаем простой проход
                 for row in reader:
                     if self.user_product.lower() in row["Продукт"].split(" ")[0] or self.user_product.lower() in row["Продукт"]:
                         self.name = row["Продукт"]
@@ -50,6 +56,7 @@ class InfoProduct():
                         self.calories = row["Калории"]
                         self.category = row["Категория"]
                         break
+                
     
     def __IsAlike(self, userinput: str, product: str) -> bool:
     
@@ -66,17 +73,20 @@ class InfoProduct():
     
     ##Метод возвращающий слово в именительном падеже
     def __go_to_nominative(self, word_to_nominative):
+        not_to_nominative_words = ["суши"] ##Слова которые не надо переводить в именительный падеж
+
         morph = pymorphy2.MorphAnalyzer()
         new_word_construct = []
 
         ##Цикл для того, чтобы все слова в продукте перевести в именительный падеж
         for i in word_to_nominative.split(" "):
-            word = morph.parse(i)[0]
-            new_word = word.inflect({'nomn'}) ##Переводим слово из косвенного падежа в именительный
-            if new_word is None:
-                return word_to_nominative
-            else:
-                new_word_construct.append(new_word.word)
+            if i not in not_to_nominative_words:
+                word = morph.parse(i)[0]
+                new_word = word.inflect({'nomn'}) ##Переводим слово из косвенного падежа в именительный
+                if new_word is None:
+                    return word_to_nominative
+                else:
+                    new_word_construct.append(new_word.word)
 
         return " ".join(new_word_construct).replace("ё", "е") ##Возвращаем слово в именительном падеже
 
@@ -105,7 +115,7 @@ class InfoProduct():
         return self.product_img
         
 ##Класс для поиска продукта по определённым характеристикам
-class ProductSearch():
+class ProductSearch:
     
     list_of_titles = ["Белки", "Жиры", "Углеводы", "Калории"]
     list_of_categories = ["грибы", "колбасы", "крупы и каши", "масла и жиры", "молочные продукты", "мука и мучные изделия", "мясные продукты", "овощи и зелень", "орехи и сухофрукты", "рыба и морепродукты", "снэки, сыры и творог", "сырье и приправы", "фрукты, ягоды", "яйца", "кондитерские изделия и сладости", "мороженое, торты", "шоколад", "напитки алкогольные", "напитки безалкогольные", "соки и компоты", "салаты, первые блюда", "фастфуд, японская кухня", "детское питание", "спортивное питание"]
