@@ -18,12 +18,12 @@ phrases_json = json.json_object["Phrases"]
 buttons_json = json.json_object["Buttons"]
 
 ##Наборы приветствий, прощаний и т.д.
-HelloWords = phrases_json["HelloWords"] = ["привет", "приветствую", "прив", "приветик", "привит", "здравствуйте", "здравствуй", "зравия желаю", "здарова"]
+HelloWords = phrases_json["HelloWords"] = ["привет", "приветствую" "приветик", "здравствуйте", "здравствуй", "зравия желаю"]
 ExitWords = phrases_json["ExitWords"] = ["выход", "выключись", "пока", "прощай", "как меня зовут", "переведи на английский"] ##Фразы при которых Алиса выйдет из сессии
-LeaveWords = phrases_json["LeaveWords"] = ["Выключаюсь...", "Выключаю навык \"ИнфоЕд\"", "Выходим из \"Инфоеда\""] ##Фразы которые Алиса скажет когда выключит навык
+LeaveWords = phrases_json["LeaveWords"] = ["Прощайте", "До свидания", "Увидимся!", "До встречи"] ##Фразы которые Алиса скажет когда выключит навык
 
 ##Активирующие слова
-ActivationWords = phrases_json["ActivationWords"] = ["расскажи про", "скажи про", "пожалуйста про", "посчитай", "рассчитай", "что насчет", "что насчёт", "как насчет", "как насчёт"]
+ActivationWords = phrases_json["ActivationWords"] = ["расскажи про", "расскажи о", "скажи про", "скажи о", "пожалуйста про", "посчитай", "рассчитай", "что насчет", "что насчёт", "как насчет", "как насчёт"]
 
 ##Слова для отправки сообщения об ошибке
 ActivationEmailWords = phrases_json["ActivateEmailWords"] = ["ошибка"]
@@ -99,7 +99,7 @@ def main():
             users_first_command[user_id] = False ##Ставим в словаре с ключом айди то, что пользователь не написал первую команду
 
         ##Если пользователь хочет случайный продукт
-        if "покажи случайный продукт" in text:
+        elif "покажи случайный продукт" in text or "покажи рандомный продукт" in text or "случайный продукт" in text or "рандомный продукт" in text:
             search = ProductSearch() ##Делаем объект на основе класса ProductSearch
             response_text, response_img = search.random_product()
             title_card = search.name.split()[0].title() + " " + " ".join(search.name.split()[1::]) + f" ({search.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
@@ -110,8 +110,19 @@ def main():
             return response_to_alice.card_response(response_img, title_card, response_text, response_speak, buttons)
 
         ##Делаем условие, что активационные слова есть в тексте
-        if ("расскажи" in text and "про" in text) or ("скажи" in text and "про" in text) or ("пожалуйста" in text and "про" in text) or ("что" in text or "как" in text and "насчёт" in text) or ("посчитай" in text) or ("рассчитай" in text): 
-            product = CorrectString(text).remove_other_words(ActivationWords)
+        elif ("расскажи" in text and "про" in text) or ("расскажи" in text and "о" in text) or ("скажи" in text and "про" in text) or ("скажи" in text and "о" in text) or ("пожалуйста" in text and "про" in text) or ("что" in text or "как" in text and "насчёт" in text) or ("посчитай" in text) or ("рассчитай" in text): 
+            product = CorrectString(text).remove_other_words(ActivationWords) ##Продукт в именительном падеже и без мусорных слов
+
+            ##Если сообщение было: расскажи про случайный продукт
+            if product == "случайный продукт" or product == "рандомный продукт":
+                search = ProductSearch() ##Делаем объект на основе класса ProductSearch
+                response_text, response_img = search.random_product()
+                title_card = search.name.split()[0].title() + " " + " ".join(search.name.split()[1::]) + f" ({search.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
+                response_speak = response_text
+                buttons = DefaultButtons
+
+                ##Отправляем ответ алисе
+                return response_to_alice.card_response(response_img, title_card, response_text, response_speak, buttons)
 
             ##Проверка на то, был ли введён продукт
             if len(product) != 0: ##Т.е., product != ""
@@ -149,11 +160,12 @@ def main():
             else: ##Если пользователь ввёл только активационное слово
                 response_text = "Эй, надо же сказать и продукт!"
                 response_speak = response_text
-
+        
+        
         ##Если пользователь хочет узнать больше информации о командах
         elif text.split(" ")[0] in ["помощь"]:
-            response_text = "Я умею:\n• Считать пищевую ценность продукта при помощи команды \"Расскажи про\". (расскажи про чай).\n• Рассказывать о случайном продукте с помощью команды \"Покажи случайный продукт\"."
-            response_speak = "Я умею:первое. Считать пищевую ценность продукта при помощи команды \"Расскажи пр+о\". второе. Рассказывать о случайном продукте с помощью команды \"Покажи случайный продукт\"."
+            response_text = "Я умею:\n• Считать пищевую ценность продукта при помощи команды \"Расскажи про\". (расскажи про чай).\n• Рассказывать о случайном продукте с помощью команды \"Расскажи про случайный продукт\"."
+            response_speak = "Я умею sil <[200]> первое. Считать пищевую ценность продукта при помощи команды \"Расскажи пр+о\". второе. Рассказывать о случайном продукте с помощью команды \"Расскажи про случайный продукт\"."
             buttons = [] ##Пользователь уже в помощи, поэтому кнопки оставляем пустыми
             response_img = None
 
@@ -174,19 +186,35 @@ def main():
             return response_to_alice.simply_response(response_text, response_speak, buttons)
 
         elif text in HelloWords: ##Если пользователь приветствует
-            response_text = random.choice(HelloWords).title()
+            response_text = random.choice(HelloWords)
+            response_text.split()[0].title() + " " + " ".join(response_text.split()[1::]) ##Делаем словосочетания с заглавной буквы
             response_speak = response_text
+            buttons = OnlyMoreButton
+
+            ##Отправляем ответ алисе
+            return response_to_alice.simply_response(response_text, response_speak, buttons)
 
         elif text in ExitWords: ##Если пользователь прощается
-            response_text = random.choice(LeaveWords).title()
+            response_text = random.choice(LeaveWords)
+            response_text = response_text.split()[0].title() + " " + " ".join(response_text.split()[1::]) ##Делаем словосочетания с заглавной буквы
             response_speak = response_text
-            end = True
-        
+            buttons = OnlyMoreButton
+
+            ##Отправляем ответ алисе
+            return response_to_alice.simply_response(response_text, response_speak, buttons)
+
+        else:
+            response_text = "Я вас не поняла..."
+            response_speak = response_text
+            buttons = OnlyMoreButton
+
+            ##Возвращаем ответ алисе
+            return response_to_alice.simply_response(response_text, response_speak, buttons)
     else:
         ##По сути, можно запихнуть в elif, но не очень уверен что тогда всё будет корректно работать
         if user_id not in users_first_command or users_first_command[user_id] == False:
             title_card = "Приветствуем тебя в \"ИнфоЕде\"!"
-            response_text = "Навык \"ИнфоЕда\" успешно запущен, теперь ты можешь узнать пищевую ценность (содержание белков, жиров, углеводов, калорий) большинства продуктов!\nДля этого используй команду \"Расскажи про\" и скажи название продукта.\nНапример: расскажи про чай"
+            response_text = "Навык \"ИнфоЕда\" успешно запущен, теперь ты можешь узнать пищевую ценность (содержание белков, жиров, углеводов, калорий) большинства продуктов!\nДля этого используй команду \"Расскажи про\" и скажи название продукта.\nНапример: расскажи про чай."
             response_speak = "Навык \"Инфо+Еда\" успешно запущен, теперь ты можешь узнать пищевую ценность (содержание белков, жиров, углеводов, калорий) большинства продуктов!\nДля этого используй команду \"Расскажи пр+о\" и скажи название продукта.\nНапример: расскажи пр+о чай"
             response_img = LOGO_IMG_ID ##Это первый ввод команты пользователем и поэтому отслылаем карточку с логотипом
 
@@ -201,6 +229,15 @@ def main():
             buttons = DefaultButtons
             response_img = LOGO_IMG_ID
             meet_again = True
+        
+        ##Если ничего из перечисленного в условиях выше не подходит
+        else:
+            response_text = "Я вас не поняла..."
+            response_speak = response_text
+            buttons = OnlyMoreButton
+
+            ##Возвращаем ответ алисе
+            return response_to_alice.simply_response(response_text, response_speak, buttons)
     
     ##Если пользователь впервые в навыке или если очистил окно с диалогом внутри навыка (за это и отвечает meet_again)
     if users_first_command[user_id] == False or meet_again and response_img != None:
