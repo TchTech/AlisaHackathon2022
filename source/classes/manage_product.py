@@ -121,6 +121,31 @@ class ProductSearch:
     list_of_categories = ["грибы", "колбасы", "крупы и каши", "масла и жиры", "молочные продукты", "мука и мучные изделия", "мясные продукты", "овощи и зелень", "орехи и сухофрукты", "рыба и морепродукты", "снэки, сыры и творог", "сырье и приправы", "фрукты, ягоды", "яйца", "кондитерские изделия и сладости", "мороженое, торты", "шоколад", "напитки алкогольные", "напитки безалкогольные", "соки и компоты", "салаты, первые блюда", "фастфуд, японская кухня", "детское питание", "спортивное питание"]
     list_of_limits = ["min", "max"]
 
+    def random_product(self):
+        with open('products.csv') as csvfile:
+            reader = csv.DictReader(csvfile)
+
+            all_rows = 1
+            for row in reader:
+                all_nums += 1
+
+            random_num = random.randint(1, all_nums)
+
+            num = 1
+            for row in reader:
+                if num == random_num:
+                    return [
+                    row["Продукт"], 
+                    row["Вес (г)"], 
+                    row["Белки"], 
+                    row["Жиры"], 
+                    row["Углеводы"], 
+                    row["Калории"], 
+                    row["Категория"]
+                    ]
+                num += 1
+
+
     def random_product_by_category(self, category: str) -> str:
         if category.lower() in self.list_of_categories:
             list_by_category = []
