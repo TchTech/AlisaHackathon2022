@@ -1,3 +1,9 @@
+import email, smtplib, ssl
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 class Mail():
 
     sender_mail = {} #Словарь с данными о письме отправителя
