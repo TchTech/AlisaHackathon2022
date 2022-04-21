@@ -55,6 +55,9 @@ class InfoProduct:
                         self.carbohydrates = row["Углеводы"]
                         self.calories = row["Калории"]
                         self.category = row["Категория"]
+
+                        ##Картинка категории для отображения в карточке
+                        self.product_img = category_imgs_id[self.category.lower()]
                         break
                 
     
@@ -118,33 +121,21 @@ class InfoProduct:
 class ProductSearch:
     
     list_of_titles = ["Белки", "Жиры", "Углеводы", "Калории"]
-    list_of_categories = ["грибы", "колбасы", "крупы и каши", "масла и жиры", "молочные продукты", "мука и мучные изделия", "мясные продукты", "овощи и зелень", "орехи и сухофрукты", "рыба и морепродукты", "снэки, сыры и творог", "сырье и приправы", "фрукты, ягоды", "яйца", "кондитерские изделия и сладости", "мороженое, торты", "шоколад", "напитки алкогольные", "напитки безалкогольные", "соки и компоты", "салаты, первые блюда", "фастфуд, японская кухня", "детское питание", "спортивное питание"]
+    list_of_categories = ["грибы", "колбасы", "крупы и каши", "масла и жиры", "молочные продукты", "мука и мучные изделия", "хлебобулочные", "мясные продукты", "овощи и зелень", "орехи и сухофрукты", "рыба и морепродукты", "снэки, сыры и творог", "сырье и приправы", "фрукты, ягоды", "яйца", "кондитерские изделия и сладости", "мороженое, торты", "шоколад", "напитки алкогольные", "напитки безалкогольные", "соки и компоты", "салаты, первые блюда", "фастфуд, японская кухня", "детское питание", "спортивное питание"]
     list_of_limits = ["min", "max"]
 
     def random_product(self):
         with open('products.csv') as csvfile:
             reader = csv.DictReader(csvfile)
 
-            all_rows = 1
+            list_all_products = [] ##Сюда мы занесём все продукты
             for row in reader:
-                all_nums += 1
+                list_all_products.append([row["Продукт"], row["Вес (г)"], row["Белки"], row["Жиры"], row["Углеводы"], row["Калории"], row["Категория"]])
 
-            random_num = random.randint(1, all_nums)
-
-            num = 1
-            for row in reader:
-                if num == random_num:
-                    return [
-                    row["Продукт"], 
-                    row["Вес (г)"], 
-                    row["Белки"], 
-                    row["Жиры"], 
-                    row["Углеводы"], 
-                    row["Калории"], 
-                    row["Категория"]
-                    ]
-                num += 1
-
+            random_product = random.choice(list_all_products) ##Выбираем случайный продукт из списка всех продуктов
+            self.name, self.weight, self.proteins, self.fats, self.carbohydrates, self.calories, self.category = random_product
+            self.product_img = category_imgs_id[self.category.lower()]
+            return (self.beautiful_text(), self.get_product_img())
 
     def random_product_by_category(self, category: str) -> str:
         if category.lower() in self.list_of_categories:
@@ -192,3 +183,11 @@ class ProductSearch:
                         best_product = row["Продукт"]
                         best_value = float(row[title.lower().title()])
             return [best_product, best_value]
+
+    ##Метод для возвращения красивого текста
+    def beautiful_text(self):
+        return f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал"""
+
+    ##Метод для возврата картинки
+    def get_product_img(self):
+        return self.product_img

@@ -3,6 +3,7 @@ import random
 from config import LOGO_IMG_ID, ERROR_IMG_ID
 from classes.manage_words import JsonManager
 from classes.manage_product import InfoProduct
+from classes.manage_product import ProductSearch
 from classes.responses import Responses
 from classes.manage_words import CorrectString
 from classes.emails import EmailSend
@@ -91,7 +92,6 @@ def main():
     if text:
         ##Если айди пользователя нет в словаре, но он всё равно ввел какой-либо текст (т.е., у него УЖЕ было открыто диалоговое окно навыка)
         if user_id not in users_first_command:
-            #first_start = True
             title_card = "Эгей, тебя давно не было в \"ИнфоЕде\"!"
             response_text = "Навык \"ИнфоЕд\" успешно запущен, теперь ты можешь узнать пищевую ценность (содержание белков, жиров, углеводов, калорий) большинства продуктов!\nДля этого используй команду \"Расскажи про\" и скажи название продукта.\nНапример: расскажи про чай"
             response_speak = "Навык \"Инфо+Еда\" успешно запущен, теперь ты можешь узнать пищевую ценность (содержание белков, жиров, углеводов, калорий) большинства продуктов!\nДля этого используй команду \"Расскажи пр+о\" и скажи название продукта.\nНапример: расскажи пр+о чай"
@@ -100,13 +100,14 @@ def main():
 
         ##Если пользователь хочет случайный продукт
         if "покажи случайный продукт" in text:
-            #random_product = ProductSearch()
-            response_text = "Команда в разработке..."
+            search = ProductSearch() ##Делаем объект на основе класса ProductSearch
+            response_text, response_img = search.random_product()
+            title_card = search.name.split()[0].title() + " " + " ".join(search.name.split()[1::]) + f" ({search.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
             response_speak = response_text
             buttons = DefaultButtons
 
             ##Отправляем ответ алисе
-            return response_to_alice.simply_response(response_text, response_speak, buttons)
+            return response_to_alice.card_response(response_img, title_card, response_text, response_speak, buttons)
 
         ##Делаем условие, что активационные слова есть в тексте
         if ("расскажи" in text and "про" in text) or ("скажи" in text and "про" in text) or ("пожалуйста" in text and "про" in text) or ("что" in text or "как" in text and "насчёт" in text) or ("посчитай" in text) or ("рассчитай" in text): 
@@ -181,8 +182,6 @@ def main():
             response_speak = response_text
             end = True
         
-        
-
     else:
         ##По сути, можно запихнуть в elif, но не очень уверен что тогда всё будет корректно работать
         if user_id not in users_first_command or users_first_command[user_id] == False:
