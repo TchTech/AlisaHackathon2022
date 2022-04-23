@@ -1,4 +1,3 @@
-from re import U
 from flask import Flask, request
 import random
 from config import LOGO_IMG_ID, ERROR_IMG_ID
