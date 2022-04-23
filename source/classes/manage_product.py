@@ -2,6 +2,9 @@ import csv
 import pymorphy2
 import random
 from config import category_imgs_id, DEFAULT_IMG_ID
+import threading
+from time import sleep
+
 
 ##Класс с информацией о продукте
 class InfoProduct:
@@ -17,8 +20,11 @@ class InfoProduct:
     
     def __init__(self, product: str, stop_list: list, users_products: list, check=False): #Инициализация объекта (конструктор)
         self.user_product = self.__go_to_nominative(product.lower()) ##Далее будет использовано в методе .beautiful_text()
+        print(self.user_product, "-------------")
+        self.user_product_not_nominative = product
         self.users_products_list = users_products
         self.stop_list = stop_list ##Стоп-лист
+        self.title_card = None ##Далее будем использовать для выдачи заголовка для карточки
 
         self.product_img = None ##Ставим картинку по умолчанию
 
@@ -27,8 +33,13 @@ class InfoProduct:
             
             all_products = {}
 
+            timer = threading.Thread(target=self.timer, args=(), daemon=True)
+            timer.start()
             for row in reader:
-                all_products[row["Продукт"]] = [row["Вес (г)"], row["Белки"], row["Жиры"], row["Углеводы"], row["Калории"], row["Категория"]]
+                if len(row["Продукт"]) <= len(self.user_product)+3\
+                    and row["Продукт"][0] == self.user_product_not_nominative[0]:
+                    all_products[row["Продукт"]] = [row["Вес (г)"], row["Белки"], row["Жиры"], row["Углеводы"], row["Калории"], row["Категория"]]
+
                 if self.__IsAlike(self.user_product, row["Продукт"]) and row["Продукт"] not in self.stop_list:
                     self.name = row["Продукт"]
                     self.weight = row["Вес (г)"]
@@ -40,6 +51,7 @@ class InfoProduct:
 
                     ##Картинка категории для отображения в карточке
                     self.product_img = category_imgs_id[self.category.lower()]
+                    self.title_card = self.user_product.split()[0].title() + " " + " ".join(self.user_product.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
                     break
             
             ##Если до сих пор None - то пробуем пробежаться ещё раз
@@ -53,7 +65,8 @@ class InfoProduct:
 
                 ##Пробегаемся по списку(словарю) всех продуктов, используя расстояние Левенштейна
                 for key in all_products:
-                    if self.levenshtein(key, self.user_product) < 6:
+                    if (self.levenshtein(key, self.user_product) < 3 or self.levenshtein(key, self.user_product_not_nominative) <= 4)\
+                        and self.user_product_not_nominative[0] == key[0]:
                         self.name = key
                         self.weight = all_products[key][0]
                         self.proteins = all_products[key][1]
@@ -64,8 +77,18 @@ class InfoProduct:
 
                         ##Картинка категории для отображения в карточке
                         self.product_img = category_imgs_id[self.category.lower()]
+                        self.title_card = self.name.split()[0].title() + " " + " ".join(self.name.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
                         break
                 
+    ##Таймер
+    def timer(self):
+        i = 0
+        while True:
+            if i >= 2:
+                self.beautiful_text()
+                return
+            i += 1
+            sleep(1)
 
     def __IsAlike(self, userinput: str, product: str) -> bool:
     
@@ -83,10 +106,12 @@ class InfoProduct:
     
     ##Метод возвращающий слово в именительном падеже
     def __go_to_nominative(self, text):
-        not_to_nominative_words = ["суши", "сливки"] ##Слова которые не надо переводить в именительный падеж
+        not_to_nominative_words = ["суши", "сливки", "сушки"] ##Слова которые не надо переводить в именительный падеж
         text = text.lower().split(" ")
         morph = pymorphy2.MorphAnalyzer()
         new_text_construct = []
+
+        print(f"Перевести в им.п.: {text}")
 
         ##Цикл для того, чтобы все слова в продукте перевести в именительный падеж
         next_skip = False
@@ -105,7 +130,7 @@ class InfoProduct:
                 gent = butyavka.inflect({'nomn'})
                 new_text_construct.append(gent.word)
             else:
-                if text[word] in ["с", "со"]:    
+                if text[word] in ["с", "со", "к"]:    
                     new_text_construct.append(text[word])
                     next_skip = True
 
@@ -168,14 +193,16 @@ class InfoProduct:
         else:
             return False
 
-    ##Метод очистки списка всех продуктов пользователя
-    def clear_users_products(self, users_products: list) -> list:
+    ##Метод для возврата заголовка карточки
+    def get_title_card(self):
+        return self.title_card
 
-        ##Если длина всех названных продуктов превышает 5 - чистим
-        if len(users_products) > 5:
-            users_products = []
-        
-        return users_products
+    ##Метод для получения списка последних 5 продуктов пользователя
+    def get_users_products(self):
+        if len(self.users_products_list) > 5:
+            self.users_products_list = []
+
+        return self.users_products_list
 
     ##Метод для возврата айди картинки
     def get_product_img(self):

@@ -41,7 +41,6 @@ class CorrectString:
                                 text[word] +=  " "
                 
                 text = "".join(text).split()
-                print(f"text = {text}")
                 del text[0]
                 text = " ".join(text)
 
