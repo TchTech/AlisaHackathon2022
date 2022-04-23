@@ -18,11 +18,11 @@ class JsonManager():
 class CorrectString:
 
         ##Инициализатор с присваиванием атрибуту класса string значения передаваемого string
-        def __init__(self, string):
+        def __init__(self, string=""):
                 self.string = string.lower().replace("пожалуйста", "").replace("опять", "").strip()
 
         ##Метод для удаления всего кроме названия продукта
-        def remove_other_words(self, activation_names: list) -> str:
+        def remove_other_words(self, activation_names: list, go_nominative: bool) -> str:
 
                 final_activation_names = []
                 for activation_name in activation_names:
@@ -45,14 +45,15 @@ class CorrectString:
                 del text[0]
                 text = " ".join(text)
 
-                ##Ставим все слова в тексте в именительный падеж
-                text = self.go_to_nominative(text)
-
+                if go_nominative == True:
+                        ##Ставим все слова в тексте в именительный падеж
+                        text = self.go_to_nominative(text)
+                
                 return text
 
         def go_to_nominative(self, word_to_nominative):
                 not_to_nominative_words = ["суши", "сливки"] ##Слова которые не надо переводить в именительный падеж
-
+                word_to_nominative = word_to_nominative.lower()
                 morph = pymorphy2.MorphAnalyzer()
                 new_word_construct = []
 

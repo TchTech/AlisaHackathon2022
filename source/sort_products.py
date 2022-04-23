@@ -15,7 +15,12 @@ with open("products.csv", "r") as csvfile:
         for line in reader:
             if line["Продукт"] in products_dict:
                 print(f"Повтор: {line['Продукт']}")
-            products_dict[line["Продукт"]] = [line["Вес (г)"], line["Белки"], line["Жиры"], line["Углеводы"], line["Калории"], line["Категория"]]
+
+            if "" not in [line["Вес (г)"], line["Белки"], line["Жиры"], line["Углеводы"], line["Калории"], line["Категория"]]:
+                key = line["Продукт"].replace(",", "")
+                products_dict[key] = [line["Вес (г)"], line["Белки"], line["Жиры"], line["Углеводы"], line["Калории"], line["Категория"]]
+            elif line["Углеводы"] == "":
+                products_dict[line["Продукт"]] = [line["Вес (г)"], line["Белки"], line["Жиры"], "0.0", line["Калории"], line["Категория"]]
 
         max = 0
         while max != 100:
