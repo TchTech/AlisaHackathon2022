@@ -309,7 +309,7 @@ class ProductSearch:
             if self.dict_of_titles_changing[category] == "килокалорий":
                 return [
                 [title_card, type_of_product],
-                best_value_of_category,
+                int(best_value_of_category),
                 self.dict_of_titles_changing[category],
                 category_imgs_id[type_of_product],
                 stop_list
