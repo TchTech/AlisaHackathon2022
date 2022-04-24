@@ -47,6 +47,7 @@ class Quest():
                     self.second = self.__randomizer()
                     self.thirth = self.__randomizer()
 
+    ##Выводим на запись вступление
     def PrintRules(self):
         return [
             f"Алиса хочет съесть продукт с {self.lim} содержанием {self.list_of_titles[self.index_of_category]}. Что ей лучше съесть?\n1. {self.first['Продукт']}\n2. {self.second['Продукт']}\n3. {self.thirth['Продукт']}",
@@ -57,10 +58,10 @@ class Quest():
     def IsRightAnswer(self, answer: str) -> list:
         
         for i in answer.lower().split():
-            if i in self.right_answer["Продукт"].split():
+            if i in self.right_answer["Продукт"].replace("-", " ").split():
                 return [True, "Молодец, ты правильно угадал!"]
         
-        return [False, f"Неправильно! Правильный ответ: {self.right_answer['Продукт']}, в нем содержится {self.right_answer[self.list_of_titles_im[self.index_of_category]]} {self.list_of_titles[self.index_of_category]} на 100 грамм."]
+        return [False, f"Неправильно! Правильным был ответ: {self.right_answer['Продукт']}, в данном продукте содержится {self.right_answer[self.list_of_titles_im[self.index_of_category]]} {self.list_of_titles[self.index_of_category]} на 100 грамм."]
 
     def __randomizer(self):
         with open('products.csv') as csvfile:
@@ -86,9 +87,49 @@ class Quest():
 
     ##Геттер для кнопок ответов
     def get_buttons_answers(self):
+        txt_first_btn = self.first["Продукт"].split()[0].title()
+        txt_second_btn = self.second["Продукт"].split()[0].title()
+        txt_thirth_btn = self.thirth["Продукт"].split()[0].title()
+
+        ##Окончания прилагательных кладём в список
+        adject_endings = ["ой", "ий", "ый", "ая", "ья", "ое", "ее", "ье", "ые", "ие", "ьи"]
+
+        ##Проверки для того, чтобы не отобразить пользователю одно лишь прилагательное
+        if txt_first_btn.endswith("ой") or txt_first_btn.endswith("ий")\
+        or txt_first_btn.endswith("ый") or txt_first_btn.endswith("ая")\
+        or txt_first_btn.endswith("ое") or txt_first_btn.endswith("ее")\
+        or txt_first_btn.endswith("ие") or txt_first_btn.endswith("ые")\
+        or txt_first_btn.endswith("ья") and self.first["Продукт"].split()[1][-2::] not in adject_endings\
+        or txt_first_btn.endswith("ье") and self.first["Продукт"].split()[1][-2::] not in adject_endings\
+        or txt_first_btn.endswith("ьи") and self.first["Продукт"].split()[1][-2::] not in adject_endings:
+
+            txt_first_btn += f" {self.first['Продукт'].split()[1]}"
+
+        if txt_second_btn.endswith("ой") or txt_second_btn.endswith("ий")\
+        or txt_second_btn.endswith("ый") or txt_second_btn.endswith("ая")\
+        or txt_second_btn.endswith("ое") or txt_second_btn.endswith("ее")\
+        or txt_second_btn.endswith("ие") or txt_second_btn.endswith("ые")\
+        or txt_second_btn.endswith("ья") and self.second["Продукт"].split()[1][-2::] not in adject_endings\
+        or txt_second_btn.endswith("ье") and self.second["Продукт"].split()[1][-2::] not in adject_endings\
+        or txt_second_btn.endswith("ьи") and self.second["Продукт"].split()[1][-2::] not in adject_endings:
+
+            txt_second_btn += f" {self.second['Продукт'].split()[1]}"
+
+
+        if txt_thirth_btn.endswith("ой") or txt_thirth_btn.endswith("ий")\
+        or txt_thirth_btn.endswith("ый") or txt_thirth_btn.endswith("ая")\
+        or txt_thirth_btn.endswith("ое") or txt_thirth_btn.endswith("ее")\
+        or txt_thirth_btn.endswith("ие") or txt_thirth_btn.endswith("ые")\
+        or txt_thirth_btn.endswith("ья") and self.thirth["Продукт"].split()[1][-2::] not in adject_endings\
+        or txt_thirth_btn.endswith("ье") and self.thirth["Продукт"].split()[1][-2::] not in adject_endings\
+        or txt_thirth_btn.endswith("ьи") and self.thirth["Продукт"].split()[1][-2::] not in adject_endings:
+
+            txt_thirth_btn += f" {self.thirth['Продукт'].split()[1]}"
+        
+        ##Возвращаем в виде списка со словарями
         return [
-            {"title": self.first["Продукт"].split()[0].title(), "hide": False},
-            {"title": self.second["Продукт"].split()[0].title(), "hide": False},
-            {"title": self.thirth["Продукт"].split()[0].title(), "hide": False},
+            {"title": txt_first_btn, "hide": False},
+            {"title": txt_second_btn, "hide": False},
+            {"title": txt_thirth_btn, "hide": False},
             {"title": "Покинуть квест", "hide": True}
         ]

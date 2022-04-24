@@ -20,7 +20,6 @@ class InfoProduct:
     
     def __init__(self, product: str, stop_list: list, users_products: list, check=False): #Инициализация объекта (конструктор)
         self.user_product = self.__go_to_nominative(product.lower()) ##Далее будет использовано в методе .beautiful_text()
-        print(self.user_product, "-------------")
         self.user_product_not_nominative = product
         self.users_products_list = users_products
         self.stop_list = stop_list ##Стоп-лист
@@ -33,8 +32,8 @@ class InfoProduct:
             
             all_products = {}
 
-            timer = threading.Thread(target=self.timer, args=(), daemon=True)
-            timer.start()
+            #timer = threading.Thread(target=self.timer, args=(), daemon=True)
+            #timer.start()
             for row in reader:
                 if len(row["Продукт"]) <= len(self.user_product)+3\
                     and row["Продукт"][0] == self.user_product_not_nominative[0]:
@@ -80,7 +79,7 @@ class InfoProduct:
                         self.title_card = self.name.split()[0].title() + " " + " ".join(self.name.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
                         break
                 
-    ##Таймер
+    ##Таймер (на всякий случай)
     def timer(self):
         i = 0
         while True:
@@ -110,8 +109,6 @@ class InfoProduct:
         text = text.lower().split(" ")
         morph = pymorphy2.MorphAnalyzer()
         new_text_construct = []
-
-        print(f"Перевести в им.п.: {text}")
 
         ##Цикл для того, чтобы все слова в продукте перевести в именительный падеж
         next_skip = False
@@ -175,11 +172,11 @@ class InfoProduct:
             
             ##Если названный продукт уже есть в списке продуктов
             if self.is_same_in_list(self.user_product, self.users_products_list) != True:
-                return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""",
-                        f"""В продукте \"{self.user_product}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""")
+                return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""".replace("0.0", "менее 0.1"),
+                        f"""В продукте \"{self.user_product}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грам,  калорий: {self.calories} ккал""".replace("0.0", "менее 0.1"))
             else:
-                return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""",
-                        f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""")
+                return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""".replace("0.0", "менее 0.1"),
+                        f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грам, калорий: {self.calories} ккал""".replace("0.0", "менее 0.1"))
 
         ##Если какой-то атрибут равен None (т.е., продукт не был найден) - отсылаем сообщение об ошибке         
         else:
@@ -189,8 +186,10 @@ class InfoProduct:
     ##Метод проверки: есть ли продукт НАЗВАННЫЙ пользователем в списке всех его названных продуктов
     def is_same_in_list(self, product: str, users_products: list) -> bool:
         if product in users_products:
+            print(f"Продукт {product} в {users_products}")
             return True
         else:
+            print(f"Продукт {product} не в {users_products}")
             return False
 
     ##Метод для возврата заголовка карточки
@@ -199,6 +198,8 @@ class InfoProduct:
 
     ##Метод для получения списка последних 5 продуктов пользователя
     def get_users_products(self):
+        self.users_products_list.append(self.user_product) ##Добавляем в список с продуктами пользователя введённый им продукт
+
         if len(self.users_products_list) > 5:
             self.users_products_list = []
 
@@ -212,6 +213,12 @@ class InfoProduct:
 class ProductSearch:
     
     list_of_titles = ["Белки", "Жиры", "Углеводы", "Калории"]
+    dict_of_titles_changing = {
+        "белки": "белков",
+        "жиры": "жиров",
+        "углеводы": "углеводов",
+        "калории": "килокалорий"
+    }
     list_of_categories = ["грибы", "колбасы", "крупы и каши", "масла и жиры", "молочные продукты", "мука и мучные изделия", "хлебобулочные", "мясные продукты", "овощи и зелень", "орехи и сухофрукты", "рыба и морепродукты", "снэки, сыры и творог", "сырье и приправы", "фрукты, ягоды", "яйца", "кондитерские изделия и сладости", "мороженое, торты", "шоколад", "напитки алкогольные", "напитки безалкогольные", "соки и компоты", "салаты, первые блюда", "фастфуд, японская кухня", "детское питание", "спортивное питание"]
     list_of_limits = ["min", "max"]
     
@@ -249,24 +256,72 @@ class ProductSearch:
                         list_by_category.append(row["Продукт"])
 
             return random.choice(list_by_category)
-                    
-    def search_by_value(self, value:float, title:str = "Калории") -> list:
 
-        if title.lower().title() in self.list_of_titles:
-            
+    ##Поиск по: посоветуй продукт где 100 белков на 100 грамм          
+    def search_by_value(self, value:float, category:str, stop_list:list) -> list:
+        print(f"На входе: {stop_list}")
+        print(category.lower().title(), type(category.lower().title()))
+
+        ##Проверка на категории, на случай, если pymorphy сам не справится (в большинстве случаев)
+        if category[0:3] in ["бел", "бил"]:
+            category = self.list_of_titles[0].lower()
+        elif category[0:3] in ["жир", "жыр"]:
+            category = self.list_of_titles[1].lower()
+        elif category[0:3] in ["угл", "укл"]:
+            category = self.list_of_titles[2].lower()
+        elif category[0:3] in ["кал", "кол", "кил", "кел"]:
+            category = self.list_of_titles[3].lower()
+
+
+        if category.lower().title() in self.list_of_titles:
+
             best_value: float = None
             best_product: str = None
-            best_value_of_title: float = None
+            best_value_of_category: float = None
 
             with open('products.csv') as csvfile:
                 reader = csv.DictReader(csvfile)
+
                 for row in reader:
-                    if (abs(float(row[title.lower().title()]) - value) < best_value) or (best_product is None):
+
+                    if best_product is None:
                         best_product = row["Продукт"]
-                        best_value = abs(float(row[title.lower().title()]) - value)
-                        best_value_of_title = float(row[title.lower().title()])
-                                
-            return [best_product, best_value_of_title]
+                        best_value = abs(float(row[category.lower().title()]) - value)
+                        best_value_of_category = float(row[category.lower().title()])
+                        type_of_product = row["Категория"]
+      
+                    if abs(float(row[category.lower().title()]) - value) < best_value and row["Продукт"] not in stop_list:
+                        best_product = row["Продукт"]
+                        best_value = abs(float(row[category.lower().title()]) - value)
+                        best_value_of_category = float(row[category.lower().title()])
+                        type_of_product = row["Категория"]
+
+
+                stop_list.append(best_product) ##Добавляем название продукта в стоп-лист
+
+                print(f"На выходе: {stop_list}")
+                ##Если длина более 5 элементов или же 5 - будем чистить стоп-лист
+                if len(stop_list) >= 5:
+                    stop_list = []
+
+            title_card = best_product.split()[0].title() + " " + " ".join(best_product.split()[1::])
+            ##Возвращаем. 0 - название продукта, 1 - цифра характеристики, 2 - родительный падеж характеристики, 3 - стоп лист
+            if self.dict_of_titles_changing[category] == "килокалорий":
+                return [
+                [title_card, type_of_product],
+                best_value_of_category,
+                self.dict_of_titles_changing[category],
+                category_imgs_id[type_of_product],
+                stop_list
+                ]
+            else:
+                return [
+                [best_product, type_of_product],
+                best_value_of_category,
+                "грамм " + self.dict_of_titles_changing[category],
+                category_imgs_id[type_of_product],
+                stop_list
+                ]
 
 
     def search_by_limit(self, limit:str = "max", title:str = "Калории") -> list:
@@ -282,7 +337,49 @@ class ProductSearch:
                     if (best_product is None) or (limit.lower() == "max" and float(best_value) < float(row[title.lower().title()])) or (limit.lower() == "min" and float(best_value) > float(row[title.lower().title()])):
                         best_product = row["Продукт"]
                         best_value = float(row[title.lower().title()])
+                        
             return [best_product, best_value]
+
+    ##Метод для удаления всех слов, кроме количества какой-либо характеристики
+    def remove_all_in_specification(self, text: str):
+        text = text.split()
+        new_text_construct = [] ##Сюда будем класть количество(цифру) и характеристику
+
+        digit_index = None
+        for word in range(len(text)):
+            if text[word].replace(".", "").replace(",", "").isdigit():
+                if len(new_text_construct) > 0:
+                    new_text_construct.insert(0, text[word])
+                    new_text_construct.pop()
+                else:
+                    new_text_construct.insert(0, text[word])
+
+                digit_index = word
+
+        for word in text[digit_index::]:
+                if word[0] in "бжук":
+                    new_text_construct.append(word)
+                    break
+
+        for word in new_text_construct:
+            if not word.isdigit() and word[0:3] not in ["бел", "бил", "жир", "жыр", "угл", "укл", "кал", "кол", "кил", "кел"]:
+                new_text_construct.remove(word)
+
+        text = " ".join(new_text_construct)
+        new_text_construct = []
+
+        ##Здесь начинаем переводить в именительный падеж
+        morph = pymorphy2.MorphAnalyzer()
+
+        for word in text.split():
+            if not word.replace(".", "").replace(",", "").isdigit():
+                butyavka = morph.parse(word)[0]
+                gent = butyavka.inflect({'nomn'})
+                new_text_construct.append(gent.word)
+            else:
+                new_text_construct.append(word)
+
+        return " ".join(new_text_construct)
 
     ##Метод для возвращения красивого текста
     def beautiful_text(self):
