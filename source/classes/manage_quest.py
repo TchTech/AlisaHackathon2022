@@ -22,30 +22,46 @@ class Quest():
 
 
         while self.right_answer is None:
-
+            
             if self.lim == "большим":
-                if self.first[self.list_of_titles_im[self.index_of_category]] > self.second[self.list_of_titles_im[self.index_of_category]] and self.first[self.list_of_titles_im[self.index_of_category]] > self.thirth[self.list_of_titles_im[self.index_of_category]]:
+                if self.first[self.list_of_titles_im[self.index_of_category]] > self.second[self.list_of_titles_im[self.index_of_category]]\
+                and self.first[self.list_of_titles_im[self.index_of_category]] > self.thirth[self.list_of_titles_im[self.index_of_category]]:
                     self.right_answer = self.first
-                elif self.second[self.list_of_titles_im[self.index_of_category]] > self.first[self.list_of_titles_im[self.index_of_category]] and self.second[self.list_of_titles_im[self.index_of_category]] > self.thirth[self.list_of_titles_im[self.index_of_category]]:
+                elif self.second[self.list_of_titles_im[self.index_of_category]] > self.first[self.list_of_titles_im[self.index_of_category]]\
+                and self.second[self.list_of_titles_im[self.index_of_category]] > self.thirth[self.list_of_titles_im[self.index_of_category]]:
                     self.right_answer = self.second
-                elif self.thirth[self.list_of_titles_im[self.index_of_category]] > self.first[self.list_of_titles_im[self.index_of_category]] and self.thirth[self.list_of_titles_im[self.index_of_category]] > self.second[self.list_of_titles_im[self.index_of_category]]:
+                elif self.thirth[self.list_of_titles_im[self.index_of_category]] > self.first[self.list_of_titles_im[self.index_of_category]]\
+                and self.thirth[self.list_of_titles_im[self.index_of_category]] > self.second[self.list_of_titles_im[self.index_of_category]]:
                     self.right_answer = self.thirth
                 else:
-                    self.first = self.__randomizer()
-                    self.second = self.__randomizer()
-                    self.thirth = self.__randomizer()
+                    while self.first["Продукт"].split()[0] == self.second["Продукт"].split()[0]\
+                    or self.first["Продукт"].split()[0] == self.thirth["Продукт"].split()[0]:
+                        self.first = self.__randomizer()
+                        self.second = self.__randomizer()
+                        self.thirth = self.__randomizer()
 
             elif self.lim == "маленьким":
-                if self.first[self.list_of_titles_im[self.index_of_category]] < self.second[self.list_of_titles_im[self.index_of_category]] and self.first[self.list_of_titles_im[self.index_of_category]] < self.thirth[self.list_of_titles_im[self.index_of_category]]:
+                if self.first[self.list_of_titles_im[self.index_of_category]] < self.second[self.list_of_titles_im[self.index_of_category]]\
+                and self.first[self.list_of_titles_im[self.index_of_category]] < self.thirth[self.list_of_titles_im[self.index_of_category]]:
                     self.right_answer = self.first
-                elif self.second[self.list_of_titles_im[self.index_of_category]] < self.first[self.list_of_titles_im[self.index_of_category]] and self.second[self.list_of_titles_im[self.index_of_category]] < self.thirth[self.list_of_titles_im[self.index_of_category]]:
+                elif self.second[self.list_of_titles_im[self.index_of_category]] < self.first[self.list_of_titles_im[self.index_of_category]]\
+                and self.second[self.list_of_titles_im[self.index_of_category]] < self.thirth[self.list_of_titles_im[self.index_of_category]]:
                     self.right_answer = self.second
-                elif self.thirth[self.list_of_titles_im[self.index_of_category]] < self.first[self.list_of_titles_im[self.index_of_category]] and self.thirth[self.list_of_titles_im[self.index_of_category]] < self.second[self.list_of_titles_im[self.index_of_category]]:
+                elif self.thirth[self.list_of_titles_im[self.index_of_category]] < self.first[self.list_of_titles_im[self.index_of_category]]\
+                and self.thirth[self.list_of_titles_im[self.index_of_category]] < self.second[self.list_of_titles_im[self.index_of_category]]:
                     self.right_answer = self.thirth
                 else:
-                    self.first = self.__randomizer()
-                    self.second = self.__randomizer()
-                    self.thirth = self.__randomizer()
+                    while self.first["Продукт"].split()[0] == self.second["Продукт"].split()[0]\
+                    or self.first["Продукт"].split()[0] == self.thirth["Продукт"].split()[0]:
+                        self.first = self.__randomizer()
+                        self.second = self.__randomizer()
+                        self.thirth = self.__randomizer()
+
+            while self.first["Продукт"].split()[0] == self.second["Продукт"].split()[0]\
+            or self.first["Продукт"].split()[0] == self.thirth["Продукт"].split()[0]:
+                self.first = self.__randomizer()
+                self.second = self.__randomizer()
+                self.thirth = self.__randomizer()
 
     ##Выводим на запись вступление
     def PrintRules(self):
@@ -59,9 +75,15 @@ class Quest():
         
         for i in answer.lower().split():
             if i in self.right_answer["Продукт"].replace("-", " ").split():
-                return [True, "Молодец, ты правильно угадал!"]
+                return [True,
+                "Молодец, ты правильно угадал!",
+                [{"title": f"Расскажи про {self.right_answer['Продукт']}"}]
+                ]
         
-        return [False, f"Неправильно! Правильным был ответ: {self.right_answer['Продукт']}, в данном продукте содержится {self.right_answer[self.list_of_titles_im[self.index_of_category]]} {self.list_of_titles[self.index_of_category]} на 100 грамм."]
+        return [False,
+        f"Неправильно! Правильным был ответ: {self.right_answer['Продукт']}, в данном продукте содержится {self.right_answer[self.list_of_titles_im[self.index_of_category]]} {self.list_of_titles[self.index_of_category]} на 100 грамм.",
+        [{"title": f"Расскажи про {self.right_answer['Продукт']}"}]
+        ]
 
     def __randomizer(self):
         with open('products.csv') as csvfile:

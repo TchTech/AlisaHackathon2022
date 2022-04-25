@@ -70,3 +70,28 @@ class CorrectString:
                                 new_word_construct.append(i)
 
                 return " ".join(new_word_construct).replace("ё", "е") ##Возвращаем слово в именительном падеже
+
+        ##Удаляем все слова чтобы посчитать
+        def remove_other_words_to_calculate(self, text, words_before_product: list, words_after_product: list) -> tuple:
+                text = text.split()
+                product = []
+                weight = []
+
+                index = 0
+                for i in text:
+                        if i in words_before_product:
+                                index = text.index(i)
+
+                ##Достаём продукт    
+                for j in text[index+1::]:
+                        if j not in words_after_product:
+                                product.append(j)
+                        else:
+                                index = text.index(j)
+                                break
+
+                ##Достаём вес
+                for i in text[index+1::]:
+                        weight.append(i)
+
+                return (" ".join(product), " ".join(weight))

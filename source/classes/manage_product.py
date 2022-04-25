@@ -22,6 +22,7 @@ class InfoProduct:
         self.user_product = self.__go_to_nominative(product.lower()) ##Далее будет использовано в методе .beautiful_text()
         self.user_product_not_nominative = product
         self.users_products_list = users_products
+        print(f"{self.user_product}, {self.user_product_not_nominative} ---------------- ", product)
         self.stop_list = stop_list ##Стоп-лист
         self.title_card = None ##Далее будем использовать для выдачи заголовка для карточки
 
@@ -36,21 +37,29 @@ class InfoProduct:
             #timer.start()
             for row in reader:
                 if len(row["Продукт"]) <= len(self.user_product)+3\
-                    and row["Продукт"][0] == self.user_product_not_nominative[0]:
+                    and row["Продукт"].lower()[0] == self.user_product_not_nominative[0]:
+
                     all_products[row["Продукт"]] = [row["Вес (г)"], row["Белки"], row["Жиры"], row["Углеводы"], row["Калории"], row["Категория"]]
 
-                if self.__IsAlike(self.user_product, row["Продукт"]) and row["Продукт"] not in self.stop_list:
+                if self.__IsAlike(self.user_product, row["Продукт"]) and row["Продукт"] not in self.stop_list\
+                    or row["Продукт"].lower() == self.user_product_not_nominative: ##ТУТ БЫЛО ДОБАВЛЕНО ЭТО, РЕШЕНИЕ НЕ 100%, НАДО НЕ ЗАБЫТЬ УЛУЧШИТЬ!!!!!!!
                     self.name = row["Продукт"]
                     self.weight = row["Вес (г)"]
-                    self.proteins = row["Белки"]
-                    self.fats = row["Жиры"]
-                    self.carbohydrates = row["Углеводы"]
-                    self.calories = row["Калории"]
+                    self.proteins = row["Белки"] if float(row["Белки"]) > 0.0 else row["Белки"].replace("0.0", "менее 0.1")
+                    self.fats = row["Жиры"] if float(row["Жиры"]) > 0.0 else row["Жиры"].replace("0.0", "менее 0.1")
+                    self.carbohydrates = row["Углеводы"] if float(row["Углеводы"]) > 0.0 else row["Углеводы"].replace("0.0", "менее 0.1")
+                    self.calories = row["Калории"] if float(row["Калории"]) > 0.0 else row["Калории"].replace("0", "менее 0.1")
                     self.category = row["Категория"]
 
                     ##Картинка категории для отображения в карточке
                     self.product_img = category_imgs_id[self.category.lower()]
-                    self.title_card = self.user_product.split()[0].title() + " " + " ".join(self.user_product.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
+
+                    ##Если продукт совпал напрямую - то в заголовок карточки ставим название из БД
+                    if row["Продукт"].lower() == self.user_product_not_nominative:
+                        self.title_card = self.user_product_not_nominative.split()[0].title() + " " + " ".join(self.user_product_not_nominative.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
+                    else:
+                        self.title_card = self.user_product.split()[0].title() + " " + " ".join(self.user_product.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
+
                     break
             
             ##Если до сих пор None - то пробуем пробежаться ещё раз
@@ -59,8 +68,8 @@ class InfoProduct:
                 self.stop_list = []
 
                 ##Если мы прошлись только 1 раз
-                if check == False:
-                    self.__init__(self.user_product, self.stop_list, self.users_products_list, check=True)
+                #if check == False:
+                    #self.__init__(self.user_product, self.stop_list, self.users_products_list, check=True)
 
                 ##Пробегаемся по списку(словарю) всех продуктов, используя расстояние Левенштейна
                 for key in all_products:
@@ -68,10 +77,10 @@ class InfoProduct:
                         and self.user_product_not_nominative[0] == key[0]:
                         self.name = key
                         self.weight = all_products[key][0]
-                        self.proteins = all_products[key][1]
-                        self.fats = all_products[key][2]
-                        self.carbohydrates = all_products[key][3]
-                        self.calories = all_products[key][4]
+                        self.proteins = all_products[key][1] if float(all_products[key][1]) > 0.0 else all_products[key][1].replace("0.0", "менее 0.1")
+                        self.fats = all_products[key][2] if float(all_products[key][2]) > 0.0 else all_products[key][2].replace("0.0", "менее 0.1")
+                        self.carbohydrates = all_products[key][3] if float(all_products[key][3]) > 0.0 else all_products[key][3].replace("0.0", "менее 0.1")
+                        self.calories = all_products[key][4] if float(all_products[key][4]) > 0.0 else all_products[key][4].replace("0", "менее 0.1")
                         self.category = all_products[key][5]
 
                         ##Картинка категории для отображения в карточке
@@ -113,23 +122,25 @@ class InfoProduct:
         ##Цикл для того, чтобы все слова в продукте перевести в именительный падеж
         next_skip = False
         for word in range(len(text)):
-                
-            if text[word] in not_to_nominative_words:
-                new_text_construct.append(text[word])
-                continue
-
-            if next_skip == True:
-                new_text_construct.append(text[word])
-                continue
-
-            if len(text[word]) > 1:
-                butyavka = morph.parse(text[word])[0]
-                gent = butyavka.inflect({'nomn'})
-                new_text_construct.append(gent.word)
-            else:
-                if text[word] in ["с", "со", "к"]:    
+            try:
+                if text[word] in not_to_nominative_words:
                     new_text_construct.append(text[word])
-                    next_skip = True
+                    continue
+
+                if next_skip == True:
+                    new_text_construct.append(text[word])
+                    continue
+
+                if len(text[word]) > 1:
+                    butyavka = morph.parse(text[word])[0]
+                    gent = butyavka.inflect({'nomn'})
+                    new_text_construct.append(gent.word)
+                else:
+                    if text[word] in ["с", "со", "к"]:    
+                        new_text_construct.append(text[word])
+                        next_skip = True
+            except:
+                new_text_construct.append(text[word])
 
         return " ".join(new_text_construct).replace("ё", "е") ##Возвращаем слово в именительном падеже
 
@@ -172,16 +183,16 @@ class InfoProduct:
             
             ##Если названный продукт уже есть в списке продуктов
             if self.is_same_in_list(self.user_product, self.users_products_list) != True:
-                return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""".replace("0.0", "менее 0.1"),
-                        f"""В продукте \"{self.user_product}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грам,  калорий: {self.calories} ккал""".replace("0.0", "менее 0.1"))
+                return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""",
+                        f"""В продукте \"{self.user_product}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грам,  калорий: {self.calories} ккал""")
             else:
-                return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""".replace("0.0", "менее 0.1"),
-                        f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грам, калорий: {self.calories} ккал""".replace("0.0", "менее 0.1"))
+                return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""",
+                        f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грам, калорий: {self.calories} ккал""")
 
         ##Если какой-то атрибут равен None (т.е., продукт не был найден) - отсылаем сообщение об ошибке         
         else:
-            return (f"Продукт \"{self.user_product}\" не найден...\nВы можете отправить отчёт об ошибке с помощью команды \"Ошибка\"",
-                    f"Продукт \"{self.user_product}\ не найден, но вы можете отправить отчёт об ошибке с помощью команды \"Ошибка\"")
+            return (f"Продукт \"{self.user_product_not_nominative}\" не найден...\nВы можете отправить отчёт об ошибке с помощью команды \"Ошибка\"",
+                    f"Продукт \"{self.user_product_not_nominative}\ не найден, но вы можете отправить отчёт об ошибке с помощью команды \"Ошибка\"")
     
     ##Метод проверки: есть ли продукт НАЗВАННЫЙ пользователем в списке всех его названных продуктов
     def is_same_in_list(self, product: str, users_products: list) -> bool:
@@ -191,6 +202,35 @@ class InfoProduct:
         else:
             print(f"Продукт {product} не в {users_products}")
             return False
+    
+    ##Считаем бжу продукта на определённый вес
+    def calculate(self, weight: str): 
+        
+        try:
+            weight = weight.split()
+            weight_for_user = int(weight[0])
+            coefficient = (float(weight[0]))/100
+        except ValueError: ##Ошибка будет если не был указан вес
+            return f"Необходимо указать корректный вес!\nНапример: посчитай {self.user_product_not_nominative} на 100 грамм"
+
+        ##Если продукт БЫЛ НАЙДЕН - осуществляем манипуляции с переменными и выводим бжу на n-грамм продукта
+        if self.name != None:
+            if "кил" in weight[1] or "кел" in weight[1] or "кг" == weight[1]:
+                coefficient *= 1000
+                weight_for_user *= 1000
+
+            proteins = round(float(self.proteins) * coefficient, 2)
+            fats = round(float(self.fats) * coefficient, 2)
+            carbohydrates = round(float(self.carbohydrates) * coefficient, 2)
+            calories = int(self.calories) * coefficient
+
+            return (f"В продукте \"{self.name}\" на {weight_for_user} грамм содержится:\n• Белков: {proteins} грамм\n• Жиров: {fats} грамм\n• Углеводов: {carbohydrates} грамм\n• Калорий: {calories} ккал",
+                    f"В продукте \"{self.name}\" на {weight_for_user} грамм содержится:\n• Белков: {proteins} грамм\n• Жиров: {fats} грамм\n• Углеводов: {carbohydrates} грамм\n• Калорий: {calories} ккал"
+            )
+        else: ##Если продукт не был найден - возвращаем это пользователю
+            return (f"Продукт \"{self.user_product_not_nominative}\" не найден...\nВы можете отправить отчёт об ошибке с помощью команды \"Ошибка\"",
+                    f"Продукт \"{self.user_product_not_nominative}\" не найден...\nВы можете отправить отчёт об ошибке с помощью команды \"Ошибка\""
+            )
 
     ##Метод для возврата заголовка карточки
     def get_title_card(self):
@@ -198,7 +238,8 @@ class InfoProduct:
 
     ##Метод для получения списка последних 5 продуктов пользователя
     def get_users_products(self):
-        self.users_products_list.append(self.user_product) ##Добавляем в список с продуктами пользователя введённый им продукт
+        if self.user_product_not_nominative not in self.users_products_list:
+            self.users_products_list.append(self.user_product_not_nominative) ##Добавляем в список с продуктами пользователя введённый им продукт
 
         if len(self.users_products_list) > 5:
             self.users_products_list = []
