@@ -1,0 +1,17 @@
+DAWG_Python-0.7.2.dist-info/DESCRIPTION.rst,sha256=pO5tidouQ7gfCaDBvljF1ie_Ue864-aNE2Ss5bIuAo4,5786
+DAWG_Python-0.7.2.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+DAWG_Python-0.7.2.dist-info/METADATA,sha256=oG5hnInVPc7kiVGdtgW6zo-dcEXLoa5-WHc8FpuZlMo,7039
+DAWG_Python-0.7.2.dist-info/RECORD,,
+DAWG_Python-0.7.2.dist-info/WHEEL,sha256=AvR0WeTpDaxT645bl5FQxUK6NPsTls2ttpcGJg3j1Xg,110
+DAWG_Python-0.7.2.dist-info/metadata.json,sha256=OuMxoXiJbITU3OujP9PGvBspKlGif6y1lMg1DD-x-9c,1272
+DAWG_Python-0.7.2.dist-info/top_level.txt,sha256=9svLdxSlIUOFCWkMsnypP7QQXpNilzyc4GuLPQfN2mo,12
+dawg_python/__init__.py,sha256=lR0HIQRtZTy4Z9o-GE6IEAN6mh1isKttw1RdleVH8Y0,208
+dawg_python/__pycache__/__init__.cpython-39.pyc,,
+dawg_python/__pycache__/compat.cpython-39.pyc,,
+dawg_python/__pycache__/dawgs.cpython-39.pyc,,
+dawg_python/__pycache__/units.cpython-39.pyc,,
+dawg_python/__pycache__/wrapper.cpython-39.pyc,,
+dawg_python/compat.py,sha256=KUj4uJ2DiAyLlc1r-kk5NSwwTodQEfMOemDDaIYDgoE,124
+dawg_python/dawgs.py,sha256=vwGT6MUkZsNWDK93QXfckDlaETUJxrbIyl0VelnOuZQ,14704
+dawg_python/units.py,sha256=TQW4jcNF-wrh6cP-Zu-nNRkwXchAIEMs-A3XGFkohyc,771
+dawg_python/wrapper.py,sha256=1kP58CXlSmb3XPJTvrkrUghKa9B5AYNiEp4dIR7bP1k,4819
