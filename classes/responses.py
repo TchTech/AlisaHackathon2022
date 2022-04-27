@@ -21,6 +21,20 @@ class Responses:
     
         return response
     
+    ##Прощальный ответ
+    def bye_response(self, response_text: str, response_speak: str):
+        ##Тело ответа
+        response = {
+            "response": {
+                "text": response_text,
+                "tts": response_speak,
+                "end_session": True
+            },
+            "version": self.version
+        }
+    
+        return response
+
     ##Ответ в виде карточки
     def card_response(self, image_id:str, title_card: str, response_text: str, response_speak: str, buttons: dict):
         ##Тело ответа
