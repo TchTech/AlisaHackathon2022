@@ -77,13 +77,18 @@ class Quest():
             if i in self.right_answer["Продукт"].replace("-", " ").split():
                 return [True,
                 "Молодец, ты правильно угадал!",
-                [{"title": f"Расскажи про {self.right_answer['Продукт']}"}]
+                [{"title": f"Расскажи про {self.right_answer['Продукт']}", "hide": False},
+                 {"title": "Помощь", "hide": True},
+                 {"title": "Квест", "hide": True}
+                ]
                 ]
         
         return [False,
         f"Неправильно! Правильным был ответ: {self.right_answer['Продукт']}, в данном продукте содержится {self.right_answer[self.list_of_titles_im[self.index_of_category]]} {self.list_of_titles[self.index_of_category]} на 100 грамм.",
-        [{"title": f"Расскажи про {self.right_answer['Продукт']}"}]
-        ]
+        [{"title": f"Расскажи про {self.right_answer['Продукт']}", "hide": False},
+         {"title": "Помощь", "hide": True},
+         {"title": "Квест", "hide": True}
+        ]]
 
     def __randomizer(self):
         with open('products.csv', 'r', encoding='cp1251') as csvfile:
@@ -125,7 +130,10 @@ class Quest():
         or txt_first_btn.endswith("ье") and self.first["Продукт"].split()[1][-2::] not in adject_endings\
         or txt_first_btn.endswith("ьи") and self.first["Продукт"].split()[1][-2::] not in adject_endings:
 
-            txt_first_btn += f" {self.first['Продукт'].split()[1]}"
+            try:
+                txt_first_btn += f" {self.first['Продукт'].split()[1]}"
+            except: ##Для ловли IndexError, но мало ли выпадет что-то ещё
+                txt_first_btn = self.first["Продукт"].split()[0].title()
 
         if txt_second_btn.endswith("ой") or txt_second_btn.endswith("ий")\
         or txt_second_btn.endswith("ый") or txt_second_btn.endswith("ая")\
@@ -135,7 +143,10 @@ class Quest():
         or txt_second_btn.endswith("ье") and self.second["Продукт"].split()[1][-2::] not in adject_endings\
         or txt_second_btn.endswith("ьи") and self.second["Продукт"].split()[1][-2::] not in adject_endings:
 
-            txt_second_btn += f" {self.second['Продукт'].split()[1]}"
+            try:
+                txt_second_btn += f" {self.second['Продукт'].split()[1]}"
+            except:
+                txt_second_btn = self.second["Продукт"].split()[0].title()
 
 
         if txt_thirth_btn.endswith("ой") or txt_thirth_btn.endswith("ий")\
@@ -146,7 +157,10 @@ class Quest():
         or txt_thirth_btn.endswith("ье") and self.thirth["Продукт"].split()[1][-2::] not in adject_endings\
         or txt_thirth_btn.endswith("ьи") and self.thirth["Продукт"].split()[1][-2::] not in adject_endings:
 
-            txt_thirth_btn += f" {self.thirth['Продукт'].split()[1]}"
+            try:
+                txt_thirth_btn += f" {self.thirth['Продукт'].split()[1]}"
+            except:
+                txt_thirth_btn = self.thirth["Продукт"].split()[0].title()
         
         ##Возвращаем в виде списка со словарями
         return [
