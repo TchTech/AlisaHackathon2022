@@ -52,6 +52,12 @@ class InfoProduct:
                         self.calories = row["Калории"] if float(row["Калории"]) > 0.0 else row["Калории"].replace("0", "менее 0.1")
                         self.category = row["Категория"]
 
+                        ##Переменные для дальнейшего подсчёта
+                        self.proteins_to_calculate = row["Белки"]
+                        self.fats_to_calculate = row["Жиры"]
+                        self.carbohydrates_to_calculate = row["Углеводы"]
+                        self.calories_to_calculate = row["Калории"]
+
                         ##Картинка категории для отображения в карточке
                         self.product_img = category_imgs_id[self.category.lower()]
 
@@ -87,6 +93,12 @@ class InfoProduct:
                     self.carbohydrates = self.reserve_product["Углеводы"] if float(self.reserve_product["Углеводы"]) > 0.0 else self.reserve_product["Углеводы"].replace("0.0", "менее 0.1")
                     self.calories = self.reserve_product["Калории"] if float(self.reserve_product["Калории"]) > 0.0 else self.reserve_product["Калории"].replace("0", "менее 0.1")
                     self.category = self.reserve_product["Категория"]
+
+                    ##Переменные для дальнейшего подсчёта
+                    self.proteins_to_calculate = row["Белки"]
+                    self.fats_to_calculate = row["Жиры"]
+                    self.carbohydrates_to_calculate = row["Углеводы"]
+                    self.calories_to_calculate = row["Калории"]
 
                     ##Картинка категории для отображения в карточке
                     self.product_img = category_imgs_id[self.category.lower()]
@@ -245,10 +257,10 @@ class InfoProduct:
                 coefficient *= 1000
                 weight_for_user *= 1000
 
-            proteins = round(float(self.proteins) * coefficient, 2)
-            fats = round(float(self.fats) * coefficient, 2)
-            carbohydrates = round(float(self.carbohydrates) * coefficient, 2)
-            calories = int(self.calories) * coefficient
+            proteins = round(float(self.proteins) * coefficient, 2) if self.proteins.split()[1] != "0.1" else self.proteins
+            fats = round(float(self.fats_to_calculate) * coefficient, 2) if self.fats.split()[1] != "0.1" else self.fats
+            carbohydrates = round(float(self.carbohydrates_to_calculate) * coefficient, 2) if self.carbohydrates.split()[1] != "0.1" else self.carbohydrates
+            calories = int(self.calories_to_calculate) * coefficient if self.calories.split()[1] != "0.1" else self.calories
 
             return (f"В продукте \"{self.name}\" на {weight_for_user} грамм содержится:\n• Белков: {proteins} грамм\n• Жиров: {fats} грамм\n• Углеводов: {carbohydrates} грамм\n• Калорий: {calories} ккал",
                     f"В продукте \"{self.name}\" на {weight_for_user} грамм содержится:\n• Белков: {proteins} грамм\n• Жиров: {fats} грамм\n• Углеводов: {carbohydrates} грамм\n• Калорий: {calories} ккал"
