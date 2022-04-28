@@ -77,6 +77,7 @@ class InfoProduct:
                 #if check == False:
                     #self.__init__(self.user_product, self.stop_list, self.users_products_list, check=True)
 
+                ##Если в self.reserve_product лежит значение от продукта
                 if self.reserve_product != None:
                     print(f"Резервный продукт: {self.reserve_product}")
                     self.name = self.reserve_product["Продукт"]
