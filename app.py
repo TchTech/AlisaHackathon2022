@@ -390,7 +390,7 @@ def main():
             response_img = LOGO_IMG_ID
 
             users_stop_list_products[user_id] = []
-            users_playing_quest[user_id] = False ##В значение игры в квест ставим False, поскольку навык был перезапущен
+            users_playing_quest[user_id] = False ##В значение игры в квест ставим False,  поскольку навык был перезапущен
             users_quest[user_id] = None
 
             meet_again = True
