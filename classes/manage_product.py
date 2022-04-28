@@ -257,10 +257,10 @@ class InfoProduct:
                 coefficient *= 1000
                 weight_for_user *= 1000
 
-            proteins = round(float(self.proteins) * coefficient, 2) if self.proteins.split()[1] != "0.1" else self.proteins
-            fats = round(float(self.fats_to_calculate) * coefficient, 2) if self.fats.split()[1] != "0.1" else self.fats
-            carbohydrates = round(float(self.carbohydrates_to_calculate) * coefficient, 2) if self.carbohydrates.split()[1] != "0.1" else self.carbohydrates
-            calories = int(self.calories_to_calculate) * coefficient if self.calories.split()[1] != "0.1" else self.calories
+            proteins = round(float(self.proteins_to_calculate) * coefficient, 2) if float(round(float(self.proteins_to_calculate) * coefficient, 2)) > 0.0 else str(round(float(self.proteins_to_calculate) * coefficient, 2)).replace("0.0", "меньше 0.1")
+            fats = round(float(self.fats_to_calculate) * coefficient, 2) if float(round(float(self.fats_to_calculate) * coefficient, 2)) > 0.0 else str(round(float(self.fats_to_calculate) * coefficient, 2)).replace("0.0", "меньше 0.1")
+            carbohydrates = round(float(self.carbohydrates_to_calculate) * coefficient, 2) if float(round(float(self.carbohydrates_to_calculate) * coefficient, 2)) > 0.0 else str(round(float(self.carbohydrates_to_calculate) * coefficient, 2)).replace("0.0", "меньше 0.1")
+            calories = int(self.calories_to_calculate) * coefficient if float(round(float(self.calories_to_calculate) * coefficient, 2)) else str(round(float(self.calories_to_calculate) * coefficient, 2)).replace("0.0", "меньше 0.1")
 
             return (f"В продукте \"{self.name}\" на {weight_for_user} грамм содержится:\n• Белков: {proteins} грамм\n• Жиров: {fats} грамм\n• Углеводов: {carbohydrates} грамм\n• Калорий: {calories} ккал",
                     f"В продукте \"{self.name}\" на {weight_for_user} грамм содержится:\n• Белков: {proteins} грамм\n• Жиров: {fats} грамм\n• Углеводов: {carbohydrates} грамм\n• Калорий: {calories} ккал"

@@ -215,6 +215,7 @@ def main():
             if "посчитай" in text.split()[0] or "рассчитай" in text.split()[0]:
                 product = CorrectString().remove_other_words_to_calculate(text, ActivationCalculate["before"], ActivationCalculate["after"])
                 info = InfoProduct(product[0], users_stop_list_products[user_id], users_products[user_id])
+                users_stop_list_products[user_id] = info.get_stop_list()
 
                 ##Если продукт был найден - считаем бжу на массу
                 if info.name != None:
@@ -420,16 +421,13 @@ def main():
             ##Ответ с помощью объекта response (для полноты смотреть classes -> responses.py -> Responses)
             return response_to_alice.simply_response(response_text, response_speak, buttons)
 
-    ##Если словили ошибку - пишем "не поняли" и ошибку пишем в консоль
-    except Exception as error:
-        print(error)
+    except:
+        
         response_text = "Я вас не поняла..."
         response_speak = response_text
-        buttons = DefaultButtons
+        buttons = CalculateQuestMoreButtons
 
         return response_to_alice.simply_response(response_text, response_speak, buttons)
-
-    
 
 ##Точка входа
 if __name__ == "__main__":
