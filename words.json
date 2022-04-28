@@ -50,7 +50,10 @@
                 "\u043d\u0430",
                 "\u043f\u0440\u043e"
             ]
-        }
+        },
+        "ActivationEmailWords": [
+            "\u043e\u0448\u0438\u0431\u043a\u0430"
+        ]
     },
     "Buttons": {
         "EmptyButtons": [],
@@ -78,11 +81,11 @@
         ],
         "DefaultButtons": [
             {
-                "title": "\u041f\u043e\u043c\u043e\u0449\u044c",
+                "title": "\u041a\u0432\u0435\u0441\u0442",
                 "hide": true
             },
             {
-                "title": "\u041a\u0432\u0435\u0441\u0442",
+                "title": "\u041f\u043e\u043c\u043e\u0449\u044c",
                 "hide": true
             },
             {
@@ -118,11 +121,11 @@
         ],
         "MoreAndQuestButtons": [
             {
-                "title": "\u041f\u043e\u043c\u043e\u0449\u044c",
+                "title": "\u041a\u0432\u0435\u0441\u0442",
                 "hide": true
             },
             {
-                "title": "\u041a\u0432\u0435\u0441\u0442",
+                "title": "\u041f\u043e\u043c\u043e\u0449\u044c",
                 "hide": true
             }
         ],

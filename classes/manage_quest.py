@@ -58,16 +58,23 @@ class Quest():
                         self.thirth = self.__randomizer()
 
             while self.first["Продукт"].split()[0] == self.second["Продукт"].split()[0]\
-            or self.first["Продукт"].split()[0] == self.thirth["Продукт"].split()[0]:
+            or self.first["Продукт"].split()[0] == self.thirth["Продукт"].split()[0]\
+            or self.second["Продукт"].split()[0] == self.thirth["Продукт"].split()[0]:
                 self.first = self.__randomizer()
                 self.second = self.__randomizer()
                 self.thirth = self.__randomizer()
 
     ##Выводим на запись вступление
     def PrintRules(self):
+
+        ##Названия продуктов с заглавной буквы
+        first_product_name = self.first["Продукт"].split()[0].title() + " " + " ".join(self.first["Продукт"].split()[1::])
+        second_product_name = self.second["Продукт"].split()[0].title() + " " + " ".join(self.second["Продукт"].split()[1::])
+        thirth_product_name = self.thirth["Продукт"].split()[0].title() + " " + " ".join(self.thirth["Продукт"].split()[1::])
+
         return [
-            f"Алиса хочет съесть продукт с {self.lim} содержанием {self.list_of_titles[self.index_of_category]}. Что ей лучше съесть?\n1. {self.first['Продукт']}\n2. {self.second['Продукт']}\n3. {self.thirth['Продукт']}",
-            f"Алиса хочет съесть продукт с {self.lim} содержанием {self.list_of_titles[self.index_of_category]}. Что ей лучше съесть?\nпервое. {self.first['Продукт']}\nвторое. {self.second['Продукт']}\nтретье. {self.thirth['Продукт']}"
+            f"Алиса хочет съесть продукт с {self.lim} содержанием {self.list_of_titles[self.index_of_category]}. Что ей лучше съесть?\n1. {first_product_name}\n2. {second_product_name}\n3. {thirth_product_name}",
+            f"Алиса хочет съесть продукт с {self.lim} содержанием {self.list_of_titles[self.index_of_category]}. Что ей лучше съесть?\nпервое. {first_product_name}\nвторое. {second_product_name}\nтретье. {thirth_product_name}"
         ]
 
     ##Проверка введённого текста пользователем на правильный ответ
@@ -76,20 +83,24 @@ class Quest():
         for i in answer.lower().split():
             if i in self.right_answer["Продукт"].replace("-", " ").split():
                 return [True,
-                "Молодец, ты правильно угадал!",
+                "Молодец, это был правильный ответ!",
+                "Молодец, это был правильный ответ!",
                 [{"title": f"Расскажи про {self.right_answer['Продукт']}", "hide": False},
-                 {"title": "Помощь", "hide": True},
-                 {"title": "Квест", "hide": True}
+                 {"title": "Квест", "hide": True},
+                 {"title": "Помощь", "hide": True}
                 ]
                 ]
         
         return [False,
         f"Неправильно! Правильным был ответ: {self.right_answer['Продукт']}, в данном продукте содержится {self.right_answer[self.list_of_titles_im[self.index_of_category]]} {self.list_of_titles[self.index_of_category]} на 100 грамм.",
+        f"Неправильно! Правильным был ответ: {self.right_answer['Продукт']}, в данном продукте содержится {self.right_answer[self.list_of_titles_im[self.index_of_category]]} {self.list_of_titles[self.index_of_category]} на 100 грамм.",
         [{"title": f"Расскажи про {self.right_answer['Продукт']}", "hide": False},
-         {"title": "Помощь", "hide": True},
-         {"title": "Квест", "hide": True}
+         {"title": "Квест", "hide": True},
+         {"title": "Помощь", "hide": True}
         ]]
 
+    ##Берём рандомные продукты. Параметр choice_no_repeat = False будет говорить, что повторов нет и мы берём продукты в первый раз лишь для показа
+    ##choice_no_repeat = True будет говорить, что были повторы и будем
     def __randomizer(self):
         with open('products.csv', 'r', encoding='cp1251') as csvfile:
             reader = csv.DictReader(csvfile)

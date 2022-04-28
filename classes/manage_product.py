@@ -27,6 +27,7 @@ class InfoProduct:
         self.title_card = None ##Далее будем использовать для выдачи заголовка для карточки
 
         self.product_img = None ##Ставим картинку по умолчанию
+        self.reserve_product = None
 
         with open('products.csv', 'r', encoding='cp1251') as csvfile:
             reader = csv.DictReader(csvfile)
@@ -41,27 +42,32 @@ class InfoProduct:
 
                     all_products[row["Продукт"]] = [row["Вес (г)"], row["Белки"], row["Жиры"], row["Углеводы"], row["Калории"], row["Категория"]]
 
-                if self.__IsAlike(self.user_product, row["Продукт"]) and row["Продукт"] not in self.stop_list\
-                    or row["Продукт"].lower() == self.user_product_not_nominative: ##ТУТ БЫЛО ДОБАВЛЕНО ЭТО, РЕШЕНИЕ НЕ 100%, НАДО НЕ ЗАБЫТЬ УЛУЧШИТЬ!!!!!!!
-                    self.name = row["Продукт"]
-                    self.weight = row["Вес (г)"]
-                    self.proteins = row["Белки"] if float(row["Белки"]) > 0.0 else row["Белки"].replace("0.0", "менее 0.1")
-                    self.fats = row["Жиры"] if float(row["Жиры"]) > 0.0 else row["Жиры"].replace("0.0", "менее 0.1")
-                    self.carbohydrates = row["Углеводы"] if float(row["Углеводы"]) > 0.0 else row["Углеводы"].replace("0.0", "менее 0.1")
-                    self.calories = row["Калории"] if float(row["Калории"]) > 0.0 else row["Калории"].replace("0", "менее 0.1")
-                    self.category = row["Категория"]
+                if self.__IsAlike(self.user_product, row["Продукт"]) or self.__IsAlike(self.user_product_not_nominative, row["Продукт"]):
+                    if row["Продукт"] not in self.stop_list or row["Продукт"].lower() == self.user_product_not_nominative: 
+                        self.name = row["Продукт"]
+                        self.weight = row["Вес (г)"]
+                        self.proteins = row["Белки"] if float(row["Белки"]) > 0.0 else row["Белки"].replace("0.0", "менее 0.1")
+                        self.fats = row["Жиры"] if float(row["Жиры"]) > 0.0 else row["Жиры"].replace("0.0", "менее 0.1")
+                        self.carbohydrates = row["Углеводы"] if float(row["Углеводы"]) > 0.0 else row["Углеводы"].replace("0.0", "менее 0.1")
+                        self.calories = row["Калории"] if float(row["Калории"]) > 0.0 else row["Калории"].replace("0", "менее 0.1")
+                        self.category = row["Категория"]
 
-                    ##Картинка категории для отображения в карточке
-                    self.product_img = category_imgs_id[self.category.lower()]
+                        ##Картинка категории для отображения в карточке
+                        self.product_img = category_imgs_id[self.category.lower()]
 
-                    ##Если продукт совпал напрямую - то в заголовок карточки ставим название из БД
-                    if row["Продукт"].lower() == self.user_product_not_nominative:
-                        self.title_card = self.user_product_not_nominative.split()[0].title() + " " + " ".join(self.user_product_not_nominative.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
-                    else:
-                        self.title_card = self.user_product.split()[0].title() + " " + " ".join(self.user_product.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
+                        ##Если продукт совпал напрямую - то в заголовок карточки ставим название из БД
+                        if row["Продукт"].lower() == self.user_product_not_nominative:
+                            self.title_card = self.user_product_not_nominative.split()[0].title() + " " + " ".join(self.user_product_not_nominative.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
+                        else:
+                            self.title_card = self.user_product.split()[0].title() + " " + " ".join(self.user_product.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
 
-                    break
-            
+                        break
+
+                    ##Если продукт в стоп-листе и резервный продукт ничему не равен - присваиваем ему это значение, если продукт более не будет найден - используем его
+                    elif row["Продукт"] in stop_list and self.reserve_product == None:
+                        self.reserve_product = row
+
+
             ##Если до сих пор None - то пробуем пробежаться ещё раз
             if self.name is None:
                 print(f"Был не найден продукт: {self.user_product}")
@@ -71,22 +77,41 @@ class InfoProduct:
                 #if check == False:
                     #self.__init__(self.user_product, self.stop_list, self.users_products_list, check=True)
 
-                ##Пробегаемся по списку(словарю) всех продуктов, используя расстояние Левенштейна
-                for key in all_products:
-                    if (self.levenshtein(key, self.user_product) < 3 or self.levenshtein(key, self.user_product_not_nominative) <= 4)\
-                        and self.user_product_not_nominative[0] == key[0]:
-                        self.name = key
-                        self.weight = all_products[key][0]
-                        self.proteins = all_products[key][1] if float(all_products[key][1]) > 0.0 else all_products[key][1].replace("0.0", "менее 0.1")
-                        self.fats = all_products[key][2] if float(all_products[key][2]) > 0.0 else all_products[key][2].replace("0.0", "менее 0.1")
-                        self.carbohydrates = all_products[key][3] if float(all_products[key][3]) > 0.0 else all_products[key][3].replace("0.0", "менее 0.1")
-                        self.calories = all_products[key][4] if float(all_products[key][4]) > 0.0 else all_products[key][4].replace("0", "менее 0.1")
-                        self.category = all_products[key][5]
+                if self.reserve_product != None:
+                    print(f"Резервный продукт: {self.reserve_product}")
+                    self.name = self.reserve_product["Продукт"]
+                    self.weight = self.reserve_product["Вес (г)"]
+                    self.proteins = self.reserve_product["Белки"] if float(self.reserve_product["Белки"]) > 0.0 else self.reserve_product["Белки"].replace("0.0", "менее 0.1")
+                    self.fats = self.reserve_product["Жиры"] if float(self.reserve_product["Жиры"]) > 0.0 else self.reserve_product["Жиры"].replace("0.0", "менее 0.1")
+                    self.carbohydrates = self.reserve_product["Углеводы"] if float(self.reserve_product["Углеводы"]) > 0.0 else self.reserve_product["Углеводы"].replace("0.0", "менее 0.1")
+                    self.calories = self.reserve_product["Калории"] if float(self.reserve_product["Калории"]) > 0.0 else self.reserve_product["Калории"].replace("0", "менее 0.1")
+                    self.category = self.reserve_product["Категория"]
 
-                        ##Картинка категории для отображения в карточке
-                        self.product_img = category_imgs_id[self.category.lower()]
-                        self.title_card = self.name.split()[0].title() + " " + " ".join(self.name.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
-                        break
+                    ##Картинка категории для отображения в карточке
+                    self.product_img = category_imgs_id[self.category.lower()]
+
+                    ##Если продукт совпал напрямую - то в заголовок карточки ставим название из БД
+                    if row["Продукт"].lower() == self.user_product_not_nominative:
+                        self.title_card = self.user_product_not_nominative.split()[0].title() + " " + " ".join(self.user_product_not_nominative.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
+                    else:
+                        self.title_card = self.user_product.split()[0].title() + " " + " ".join(self.user_product.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
+                else:
+                    ##Пробегаемся по списку(словарю) всех продуктов, используя расстояние Левенштейна
+                    for key in all_products:
+                        if (self.levenshtein(key, self.user_product) < 3 or self.levenshtein(key, self.user_product_not_nominative) <= 4)\
+                            and self.user_product_not_nominative[0] == key[0]:
+                            self.name = key
+                            self.weight = all_products[key][0]
+                            self.proteins = all_products[key][1] if float(all_products[key][1]) > 0.0 else all_products[key][1].replace("0.0", "менее 0.1")
+                            self.fats = all_products[key][2] if float(all_products[key][2]) > 0.0 else all_products[key][2].replace("0.0", "менее 0.1")
+                            self.carbohydrates = all_products[key][3] if float(all_products[key][3]) > 0.0 else all_products[key][3].replace("0.0", "менее 0.1")
+                            self.calories = all_products[key][4] if float(all_products[key][4]) > 0.0 else all_products[key][4].replace("0", "менее 0.1")
+                            self.category = all_products[key][5]
+
+                            ##Картинка категории для отображения в карточке
+                            self.product_img = category_imgs_id[self.category.lower()]
+                            self.title_card = self.name.split()[0].title() + " " + " ".join(self.name.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
+                            break
                 
     ##Таймер (на всякий случай)
     def timer(self):
@@ -184,15 +209,15 @@ class InfoProduct:
             ##Если названный продукт уже есть в списке продуктов
             if self.is_same_in_list(self.user_product, self.users_products_list) != True:
                 return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""",
-                        f"""В продукте \"{self.user_product}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грам,  калорий: {self.calories} ккал""")
+                        f"""В продукте \"{self.user_product}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм!!,  калорий: {self.calories} ккал""")
             else:
                 return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""",
-                        f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грам, калорий: {self.calories} ккал""")
+                        f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм!!, калорий: {self.calories} ккал""")
 
         ##Если какой-то атрибут равен None (т.е., продукт не был найден) - отсылаем сообщение об ошибке         
         else:
             return (f"Продукт \"{self.user_product_not_nominative}\" не найден...\nВы можете отправить отчёт об ошибке с помощью команды \"Ошибка\"",
-                    f"Продукт \"{self.user_product_not_nominative}\ не найден, но вы можете отправить отчёт об ошибке с помощью команды \"Ошибка\"")
+                    f"Продукт \"{self.user_product_not_nominative}\" не найден, но вы можете отправить отчёт об ошибке с помощью команды \"Ошибка\"")
     
     ##Метод проверки: есть ли продукт НАЗВАННЫЙ пользователем в списке всех его названных продуктов
     def is_same_in_list(self, product: str, users_products: list) -> bool:
@@ -246,6 +271,16 @@ class InfoProduct:
 
         return self.users_products_list
 
+    ##Метод для возврата стоп-листа
+    def get_stop_list(self):
+        if len(self.stop_list) >= 5:
+            self.stop_list = []
+        elif self.name != None:
+            self.stop_list.append(self.name)
+
+        return self.stop_list
+
+
     ##Метод для возврата айди картинки
     def get_product_img(self):
         return self.product_img
@@ -281,7 +316,14 @@ class ProductSearch:
             if random_product in self.stop_list: ##Если случайный продукт есть в стоп-листе
                 random_product = list_all_products[list_all_products.index(random_product)-1]
 
-            self.name, self.weight, self.proteins, self.fats, self.carbohydrates, self.calories, self.category = random_product
+            ##Настраиваем характеристики продукта
+            self.name, self.weight, self.category = random_product[0], random_product[1], random_product[-1]
+
+            self.proteins = random_product[2] if float(random_product[2]) > 0.0 else random_product[2].replace("0.0", "менее 0.1")
+            self.fats = random_product[3] if float(random_product[3]) > 0.0 else random_product[3].replace("0.0", "менее 0.1")
+            self.carbohydrates = random_product[4] if float(random_product[4]) > 0.0 else random_product[4].replace("0.0", "менее 0.1")
+            self.calories = random_product[5] if float(random_product[5]) > 0.0 else random_product[5].replace("0.0", "менее 0.1")
+
             self.product_img = category_imgs_id[self.category.lower()]
             return (self.beautiful_text(), self.get_product_img())
 
