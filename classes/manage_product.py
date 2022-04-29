@@ -257,10 +257,10 @@ class InfoProduct:
                 coefficient *= 1000
                 weight_for_user *= 1000
 
-            proteins = round(float(self.proteins_to_calculate) * coefficient, 2) if float(round(float(self.proteins_to_calculate) * coefficient, 2)) > 0.0 else str(round(float(self.proteins_to_calculate) * coefficient, 2)).replace("0.0", "меньше 0.1")
-            fats = round(float(self.fats_to_calculate) * coefficient, 2) if float(round(float(self.fats_to_calculate) * coefficient, 2)) > 0.0 else str(round(float(self.fats_to_calculate) * coefficient, 2)).replace("0.0", "меньше 0.1")
-            carbohydrates = round(float(self.carbohydrates_to_calculate) * coefficient, 2) if float(round(float(self.carbohydrates_to_calculate) * coefficient, 2)) > 0.0 else str(round(float(self.carbohydrates_to_calculate) * coefficient, 2)).replace("0.0", "меньше 0.1")
-            calories = int(self.calories_to_calculate) * coefficient if float(round(float(self.calories_to_calculate) * coefficient, 2)) else str(round(float(self.calories_to_calculate) * coefficient, 2)).replace("0.0", "меньше 0.1")
+            proteins = round(float(self.proteins_to_calculate) * coefficient, 2) if float(round(float(self.proteins_to_calculate) * coefficient, 2)) > 0.0 else str(round(float(self.proteins_to_calculate) * coefficient, 2)).replace("0.0", "менее 0.1")
+            fats = round(float(self.fats_to_calculate) * coefficient, 2) if float(round(float(self.fats_to_calculate) * coefficient, 2)) > 0.0 else str(round(float(self.fats_to_calculate) * coefficient, 2)).replace("0.0", "менее 0.1")
+            carbohydrates = round(float(self.carbohydrates_to_calculate) * coefficient, 2) if float(round(float(self.carbohydrates_to_calculate) * coefficient, 2)) > 0.0 else str(round(float(self.carbohydrates_to_calculate) * coefficient, 2)).replace("0.0", "менее 0.1")
+            calories = int(self.calories_to_calculate) * coefficient if float(round(float(self.calories_to_calculate) * coefficient, 2)) else str(round(float(self.calories_to_calculate) * coefficient, 2)).replace("0.0", "менее 0.1")
 
             return (f"В продукте \"{self.name}\" на {weight_for_user} грамм содержится:\n• Белков: {proteins} грамм\n• Жиров: {fats} грамм\n• Углеводов: {carbohydrates} грамм\n• Калорий: {calories} ккал",
                     f"В продукте \"{self.name}\" на {weight_for_user} грамм содержится:\n• Белков: {proteins} грамм\n• Жиров: {fats} грамм\n• Углеводов: {carbohydrates} грамм\n• Калорий: {calories} ккал"
@@ -412,7 +412,7 @@ class ProductSearch:
                 ]
             else:
                 return [
-                [best_product, type_of_product],
+                [title_card, type_of_product],
                 best_value_of_category,
                 "грамм " + self.dict_of_titles_changing[category],
                 category_imgs_id[type_of_product],
