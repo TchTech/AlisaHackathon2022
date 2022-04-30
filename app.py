@@ -9,6 +9,9 @@ from classes.manage_words import CorrectString
 from classes.manage_mails import EmailSend
 from config import EMAIL, PASSWORD
 from classes.manage_quest import Quest
+from classes.manage_states import States
+import re
+from classes.manage_person import Person
 
 ##WSGI - приложение
 app = Flask(__name__)
@@ -59,8 +62,24 @@ CalculateQuestMoreButtons = [
     {"title": "Квест", "hide": True},
     {"title": "Помощь", "hide": True}
 ]
+SayCalculateQuestMoreButtons = [
+    {"title": "Расскажи про чай", "hide": True},
+    {"title": "Квест", "hide": True},
+    {"title": "Помощь", "hide": True},
+    {"title": "Расскажи про случайный продукт", "hide": False}
+]
 QuestButton = buttons_json["QuestButton"] = [{"title": "Квест", "hide": True}]
 ExitFromQuest = buttons_json["ExitFromQuest"] = [{"title": "Покинуть квест", "hide": True}]
+
+##Кнопки для диалогов
+MaleAndFemaleAndQuit = buttons_json["MaleAndFemale"] = [
+    {"title": "Мужской", "hide": False},
+    {"title": "Женский", "hide": False},
+    {"title": "Покинуть", "hide": True}
+]
+QuitAdviceButton = buttons_json["QuitAdviceButton"] = [
+    {"title": "Покинуть", "hide": True}
+]
 
 ##Сохранение наборов
 json.save()
@@ -87,11 +106,14 @@ users_playing_quest = {}
 ##Объект квеста для пользователей. Ключ - айди пользователя; Значение - объект класса Quest
 users_quest = {}
 
+##Объект машины состояний для каждого пользователя
+users_states = {}
+
 ##Обработчик куда алиса пришлёт ответ, а мы станем отвечать на него
 @app.route("/", methods=["POST"])
 def main():
     global users_first_command, users_stop_list_products, users_error_products, users_products, users_advice_stop_list
-    global users_playing_quest, users_quest
+    global users_playing_quest, users_quest, users_states
     global email_send
 
     req = request.json ##Ответ от алисы
@@ -131,6 +153,10 @@ def main():
     if user_id not in users_quest:
         users_quest[user_id] = None
 
+    ##В users_states по умолчанию кладём объект класса States
+    if user_id not in users_states:
+        users_states[user_id] = States()
+
     ##Служебные объекты
     response_to_alice = Responses(end=end, version=version)##Объект для разных способов ответа
 
@@ -162,7 +188,7 @@ def main():
                     users_playing_quest[user_id] = False
                     response_text = "Успешно покинули квест."
                     response_speak = response_text
-                    buttons = MoreAndQuestButtons
+                    buttons = CalculateQuestMoreButtons
                 ##Если пользователь просто играет в квест
                 else:
                     response_text = users_quest[user_id].IsRightAnswer(text)[1]
@@ -184,10 +210,154 @@ def main():
                     ##Отправляем ответ алисе
                     return response_to_alice.simply_response(response_text, response_speak, buttons)
             
+            ##Ветка с подсчётом нормы БЖУ
+            if len(re.findall(r"скольк\w\sмн\w", text)) > 0 and (users_states[user_id].say_growth == False or users_states[user_id].states_list[3] == False):
+                response_text = "Для того, чтобы определить вашу норму в день, мне нужно собрать данные о вас.\nДля начала назовите ваш пол (мужской/женский):"
+                response_speak = "Для того, чтобы определить вашу норму в день, мне нужно собрать данные о вас.\nДля начала назовите ваш пол:"
+                #buttons = MoreAndQuestButtons
+                buttons = MaleAndFemaleAndQuit
+
+                users_states[user_id].process_recommends = True
+                ##В True ставим самый первый атрибут (пол - say_sex), чтобы потом его корректно считать
+                users_states[user_id].say_sex = True
+
+                return response_to_alice.simply_response(response_text, response_speak, buttons)
+
+            ##Если пользователь хочет покинуть процесс подсчета нормы БЖУ и калорий в сутки
+            if "покинуть" in text and users_states[user_id].process_recommends == True and (users_states[user_id].say_sex == True or users_states[user_id].say_age == True or users_states[user_id].say_weight == True or users_states[user_id].say_growth == True):
+                response_text = "Успешно покинули процесс подсчета нормы БЖУ и калорий в день."
+                response_speak = response_text
+                buttons = CalculateQuestMoreButtons
+
+                ##Зануляем советы
+                users_states[user_id] = States()
+
+                return response_to_alice.simply_response(response_text, response_speak, buttons)
+
+            ##Запоминаем пол пользователя
+            if len(re.findall("муж.{0,}|жен.{0,}", text)) > 0 and (users_states[user_id].say_sex == True or users_states[user_id].states_list[0] == True):
+                sex = "мужской" if re.findall("муж.{0,}|жен.{0,}", text)[0][0:3] == "муж" else "женский"
+
+                response_text = f"Хорошо, ваш пол: {sex}.\nТеперь укажите ваш возраст:"
+                response_speak = response_text
+                #buttons = MoreAndQuestButtons
+                buttons = QuitAdviceButton
+
+                ##Продвигаем состояния вперёд
+                users_states[user_id].correctly_sex = sex
+                users_states[user_id].next()
+                users_states[user_id].say_sex = False
+                users_states[user_id].say_age = True
+
+                return response_to_alice.simply_response(response_text, response_speak, buttons)
+
+            ##Если пользователь не ввёл свой пол
+            elif len(re.findall("муж.{0,}|жен.{0,}", text)) <= 0 and (users_states[user_id].say_sex == True):
+                print(users_states[user_id].states_list)
+                print(users_states[user_id].say_sex, " - скажи пол")
+                response_text = "Не удалось распознать пол, попробуйте снова."
+                response_speak = response_text
+                #buttons = MoreAndQuestButtons
+                buttons = MaleAndFemaleAndQuit
+
+                return response_to_alice.simply_response(response_text, response_speak, buttons)
+
+            ##Запоминаем возраст пользователя
+            if text.replace("-", "").isdigit() and (users_states[user_id].say_age == True):
+                ##Если возраст пользователя нереальный 
+                if int(text) > 110 or int(text) < 0:
+                    response_text = "Вводите действительный возраст!"
+                    response_speak = response_text
+                    #buttons = MoreAndQuestButtons
+                    buttons = QuitAdviceButton
+
+                    ##Отправляем ответ алисе
+                    return response_to_alice.simply_response(response_text, response_speak, buttons)
+                else:
+                    age = int(text)
+                    response_text = f"Отлично, ваш возраст: {age}.\nТеперь укажите ваш вес (в килограммах):"
+                    response_speak = response_text
+                    #buttons = MoreAndQuestButtons
+                    buttons = QuitAdviceButton
+
+                    ##Продвигаем состояния вперёд
+                    users_states[user_id].correctly_age = age
+                    users_states[user_id].next()
+                    users_states[user_id].say_age = False
+                    users_states[user_id].say_weight = True
+                    print(users_states[user_id].states_list, "---------------------------")
+
+                    ##Отправляем ответ алисе
+                    return response_to_alice.simply_response(response_text, response_speak, buttons)
+
+            ##Если текст был не числом
+            elif isinstance(text, str) and (users_states[user_id].say_age == True):
+                response_text = "Возраст должен быть целым числом!"
+                response_speak = response_text
+                #buttons = MoreAndQuestButtons
+                buttons = QuitAdviceButton
+
+                ##Отправляем ответ алисе
+                return response_to_alice.simply_response(response_text, response_speak, buttons)
+
+            ##Запоминаем вес пользователя
+            if len("".join(re.findall(r"\d\d\d|\d\d|\d", text))) > 0 and (users_states[user_id].say_weight == True):
+                weight = float("".join(re.findall(r"\d\d\d|\d\d|\d", text))) ##Вес указанный пользователем
+                response_text = f"Супер, ваш вес: {weight} килограмм.\nТеперь укажите ваш рост (в сантиметрах)"
+                response_speak = response_text
+                #buttons = MoreAndQuestButtons
+                buttons = QuitAdviceButton
+
+                ##Продвигаем состояние вперёд
+                users_states[user_id].correctly_weight = weight
+                users_states[user_id].next()
+                users_states[user_id].say_weight = False
+                users_states[user_id].say_growth = True
+
+                ##Возвращаем ответ алисе
+                return response_to_alice.simply_response(response_text, response_speak, buttons)
+
+            ##Если пользователь не ввёл число (свой вес)
+            elif len("".join(re.findall(r"\d\d\d|\d\d|\d", text))) <= 0 and (users_states[user_id].say_weight == True):
+                response_text = "Вам необходимо указать ваш вес в следующем формате: 80 кг"
+                response_speak = response_text
+                #buttons = MoreAndQuestButtons
+                buttons = QuitAdviceButton
+
+                ##Возвращаем ответ алисе
+                return response_to_alice.simply_response(response_text, response_speak, buttons)
+
+            ##Запоминаем рост пользователя
+            if len("".join(re.findall(r"\d\d\d|\d\d", text))) > 0 and (users_states[user_id].say_growth == True):
+                growth = float("".join(re.findall(r"\d\d\d|\d\d", text))) ##Рост введённый пользователем
+                users_states[user_id].correctly_growth = growth
+
+                ##Данная переменная содержит индивидуальные рекомендации БЖУ и калорий
+                individual_recommendations = Person(users_states[user_id].correctly_sex, users_states[user_id].correctly_age, users_states[user_id].correctly_weight, users_states[user_id].correctly_growth).get_PFC()
+
+                response_text = f"Замечательно, вы ввели все нужные для подсчета данные!\nНа основе введенных вами данных, могу сказать, что в день вам следует съедать:\n• Белков: {individual_recommendations[0]} грамм.\n• Жиров: {individual_recommendations[1]} грамм.\n• Углеводов: {individual_recommendations[2]} грамм.\n• Калорий: {individual_recommendations[3]} ккал."
+                response_speak = response_text
+                buttons = MoreAndQuestButtons
+
+                ##Мы на последнем этапе, поэтому всё обнуляем (переприсваем класс States)
+                users_states[user_id] = States()
+
+                ##Возвращаем ответ алисе
+                return response_to_alice.simply_response(response_text, response_speak, buttons)
+
+            ##Если пользователь не ввёл число (минимум двузначное - свой рост)
+            elif len("".join(re.findall(r"\d\d|\d\d\d", text))) <= 0 and (users_states[user_id].say_growth == True):
+                response_text = "Вам необходимо указать ваш рост в следующем формате: 180 см"
+                response_speak = response_text
+                buttons = MoreAndQuestButtons
+
+                ##Возвращаем ответ алисе
+                return response_to_alice.simply_response(response_text, response_speak, buttons)
+
             ##Ветка с советом какого-либо продукта
             if "посоветуй" in text:
                 specification = ProductSearch(users_stop_list_products[user_id]).remove_all_in_specification(text)
-                print(f"ВВОД: {specification}")
+        
                 product = ProductSearch(users_stop_list_products[user_id]).search_by_value(float(specification.split()[0]), str(specification.split()[1]).lower(), users_advice_stop_list[user_id])
                 
                 title_card = product[0][0] + f" ({product[0][1]})"
@@ -196,7 +366,7 @@ def main():
                 response_img = product[3]
                 users_advice_stop_list[user_id] = product[4]
                 #buttons = MoreAndQuestButtons
-                buttons = DefaultButtons
+                buttons = SayCalculateQuestMoreButtons
 
                 #return response_to_alice.simply_response(response_text, response_speak, buttons)
                 return response_to_alice.card_response(response_img, title_card, response_text, response_speak, buttons)
@@ -214,7 +384,7 @@ def main():
                 return response_to_alice.card_response(response_img, title_card, response_text, response_speak, buttons)
 
             ##Ветка на "посчитай" или "рассчитай": посчитай гречку на 300 грамм
-            if "посчитай" in text.split()[0] or "рассчитай" in text.split()[0]:
+            if "посчитай" in text or "рассчитай" in text:
                 product = CorrectString().remove_other_words_to_calculate(text, ActivationCalculate["before"], ActivationCalculate["after"])
                 info = InfoProduct(product[0], users_stop_list_products[user_id], users_products[user_id])
                 users_stop_list_products[user_id] = info.get_stop_list()
@@ -289,6 +459,7 @@ def main():
                 return response_to_alice.card_response(response_img, title_card, response_text, response_speak, buttons)
             
             else:
+                print(users_states[user_id].states_list)
                 product = text ##Продукт в именительном падеже и без мусорных слов
 
                 info = InfoProduct(product, users_stop_list_products[user_id], users_products[user_id]) ##Инициализируем объект класса, в котором будет храниться вся информация о продукте
@@ -300,7 +471,7 @@ def main():
                 response_img = info.get_product_img()  ##Получаем картинку продукта
                 users_products[user_id] = info.get_users_products()
 
-                print(f"Стоп-лист: {users_stop_list_products[user_id]}")
+                #print(f"Стоп-лист: {users_stop_list_products[user_id]}")
 
                 ##Получаем стоп-лист
                 users_stop_list_products[user_id] = info.get_stop_list()
@@ -325,8 +496,8 @@ def main():
             
             ##Если пользователь хочет узнать больше информации о командах
             if text.split(" ")[0] in ["помощь"]:
-                response_text = "Я умею:\n• Считать пищевую ценность продукта на 100 грамм при помощи команды \"Расскажи про\" (расскажи про чай).\n• Рассказывать о случайном продукте с помощью команды \"Расскажи про случайный продукт\".\n• Советовать продукты с похожим количеством указанной характеристики (белков, жиров, углеводов, калорий). К примеру: посоветуй продукт с 10 граммами белка.\n• Считать пищевую ценность в определенном весе продукта. Например: посчитай пельмени на 150 грамм.\n• Играть в мини-игру с помощью команды \"Квест\"."
-                response_speak = "Я умею sil <[200]> первое. Считать пищевую ценность продукта на сто грамм при помощи команды \"Расскажи пр+о\". второе. Рассказывать о случайном продукте с помощью команды \"Расскажи про случайный продукт\". третье. Советовать продукты с похожим количеством указанной характеристики. К примеру: посоветуй продукт с десятью граммами белка на сто грамм продукта. четвёртое. Считать пищевую ценность в определённом весе продукта. Например: посчитай пельмени на 150 грамм. пятое. Играть в мини-игру с помощью команды \"Квэст\"."
+                response_text = "Я умею:\n• Считать пищевую ценность продукта на 100 грамм при помощи команды \"Расскажи про\" (расскажи про чай).\n• Рассказывать о случайном продукте с помощью команды \"Расскажи про случайный продукт\".\n• Советовать продукты с похожим количеством указанной характеристики (белков, жиров, углеводов, калорий). К примеру: \"посоветуй продукт с 10 граммами белка\".\n• Считать пищевую ценность в определенном весе продукта. Например: \"посчитай пельмени на 150 грамм\".\n• Подсказывать, сколько белков, жиров, углеводов и калорий съесть в день, исходя из личных характеристик человека (пола, возраста, веса, роста). Например: \"Сколько мне съесть в день?\"\n• Играть в мини-игру с помощью команды \"Квест\"."
+                response_speak = "Я умею sil <[200]> первое. Считать пищевую ценность продукта на сто грамм при помощи команды \"Расскажи пр+о\". второе. Рассказывать о случайном продукте с помощью команды \"Расскажи про случайный продукт\". третье. Советовать продукты с похожим количеством указанной характеристики. К примеру: посоветуй продукт с десятью граммами белка на сто грамм продукта. четвёртое. Считать пищевую ценность в определённом весе продукта. Например: посчитай пельмени на 150 грамм. пятое. Подсказывать, сколько белков, жиров, углеводов и калорий съесть в день, исходя из личных характеристик человека (пола, возраста, веса, роста). Например: \"Сколько мне съесть в день?\" шестое. Играть в мини-игру с помощью команды \"Квэст\"."
                 buttons = UserFirstCommands ##Пользователь уже в помощи, поэтому кнопки оставляем пустыми
                 response_img = None
 
@@ -429,7 +600,6 @@ def main():
 
         ##Ответ алисе
         return response_to_alice.simply_response(response_text, response_speak, buttons)
-
 
 ##Точка входа
 if __name__ == "__main__":

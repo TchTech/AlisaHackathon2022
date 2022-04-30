@@ -134,6 +134,26 @@
                 "title": "\u041a\u0432\u0435\u0441\u0442",
                 "hide": true
             }
+        ],
+        "MaleAndFemale": [
+            {
+                "title": "\u041c\u0443\u0436\u0441\u043a\u043e\u0439",
+                "hide": false
+            },
+            {
+                "title": "\u0416\u0435\u043d\u0441\u043a\u0438\u0439",
+                "hide": false
+            },
+            {
+                "title": "\u041f\u043e\u043a\u0438\u043d\u0443\u0442\u044c",
+                "hide": true
+            }
+        ],
+        "QuitAdviceButton": [
+            {
+                "title": "\u041f\u043e\u043a\u0438\u043d\u0443\u0442\u044c",
+                "hide": true
+            }
         ]
     }
 }

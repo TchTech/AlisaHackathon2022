@@ -22,7 +22,7 @@ class InfoProduct:
         self.user_product = self.__go_to_nominative(product.lower()) ##Далее будет использовано в методе .beautiful_text()
         self.user_product_not_nominative = product
         self.users_products_list = users_products
-        print(f"{self.user_product}, {self.user_product_not_nominative} ---------------- ", product)
+        #print(f"{self.user_product}, {self.user_product_not_nominative} ---------------- ", product)
         self.stop_list = stop_list ##Стоп-лист
         self.title_card = None ##Далее будем использовать для выдачи заголовка для карточки
 
@@ -85,7 +85,7 @@ class InfoProduct:
 
                 ##Если в self.reserve_product лежит значение от продукта
                 if self.reserve_product != None:
-                    print(f"Резервный продукт: {self.reserve_product}")
+                    #print(f"Резервный продукт: {self.reserve_product}")
                     self.name = self.reserve_product["Продукт"]
                     self.weight = self.reserve_product["Вес (г)"]
                     self.proteins = self.reserve_product["Белки"] if float(self.reserve_product["Белки"]) > 0.0 else self.reserve_product["Белки"].replace("0.0", "менее 0.1")
@@ -235,10 +235,10 @@ class InfoProduct:
     ##Метод проверки: есть ли продукт НАЗВАННЫЙ пользователем в списке всех его названных продуктов
     def is_same_in_list(self, product: str, users_products: list) -> bool:
         if product in users_products:
-            print(f"Продукт {product} в {users_products}")
+            #print(f"Продукт {product} в {users_products}")
             return True
         else:
-            print(f"Продукт {product} не в {users_products}")
+            #print(f"Продукт {product} не в {users_products}")
             return False
     
     ##Считаем бжу продукта на определённый вес
@@ -257,10 +257,10 @@ class InfoProduct:
                 coefficient *= 1000
                 weight_for_user *= 1000
 
-            proteins = round(float(self.proteins_to_calculate) * coefficient, 2) if float(round(float(self.proteins_to_calculate) * coefficient, 2)) > 0.0 else str(round(float(self.proteins_to_calculate) * coefficient, 2)).replace("0.0", "менее 0.1")
-            fats = round(float(self.fats_to_calculate) * coefficient, 2) if float(round(float(self.fats_to_calculate) * coefficient, 2)) > 0.0 else str(round(float(self.fats_to_calculate) * coefficient, 2)).replace("0.0", "менее 0.1")
-            carbohydrates = round(float(self.carbohydrates_to_calculate) * coefficient, 2) if float(round(float(self.carbohydrates_to_calculate) * coefficient, 2)) > 0.0 else str(round(float(self.carbohydrates_to_calculate) * coefficient, 2)).replace("0.0", "менее 0.1")
-            calories = int(self.calories_to_calculate) * coefficient if float(round(float(self.calories_to_calculate) * coefficient, 2)) else str(round(float(self.calories_to_calculate) * coefficient, 2)).replace("0.0", "менее 0.1")
+            proteins = round(float(self.proteins_to_calculate) * coefficient, 1) if float(round(float(self.proteins_to_calculate) * coefficient, 1)) > 0.0 else str(round(float(self.proteins_to_calculate) * coefficient, 1)).replace("0.0", "менее 0.1")
+            fats = round(float(self.fats_to_calculate) * coefficient, 1) if float(round(float(self.fats_to_calculate) * coefficient, 1)) > 0.0 else str(round(float(self.fats_to_calculate) * coefficient, 1)).replace("0.0", "менее 0.1")
+            carbohydrates = round(float(self.carbohydrates_to_calculate) * coefficient, 1) if float(round(float(self.carbohydrates_to_calculate) * coefficient, 1)) > 0.0 else str(round(float(self.carbohydrates_to_calculate) * coefficient, 1)).replace("0.0", "менее 0.1")
+            calories = int(self.calories_to_calculate) * coefficient if float(round(float(self.calories_to_calculate) * coefficient, 1)) else str(round(float(self.calories_to_calculate) * coefficient, 1)).replace("0.0", "менее 0.1")
 
             return (f"В продукте \"{self.name}\" на {weight_for_user} грамм содержится:\n• Белков: {proteins} грамм\n• Жиров: {fats} грамм\n• Углеводов: {carbohydrates} грамм\n• Калорий: {calories} ккал",
                     f"В продукте \"{self.name}\" на {weight_for_user} грамм содержится:\n• Белков: {proteins} грамм\n• Жиров: {fats} грамм\n• Углеводов: {carbohydrates} грамм\n• Калорий: {calories} ккал"
@@ -355,8 +355,8 @@ class ProductSearch:
 
     ##Поиск по: посоветуй продукт где 100 белков на 100 грамм          
     def search_by_value(self, value:float, category:str, stop_list:list) -> list:
-        print(f"На входе: {stop_list}")
-        print(category.lower().title(), type(category.lower().title()))
+        #print(f"На входе: {stop_list}")
+        #print(category.lower().title(), type(category.lower().title()))
 
         ##Проверка на категории, на случай, если pymorphy сам не справится (в большинстве случаев)
         if category[0:3] in ["бел", "бил"]:
@@ -395,7 +395,7 @@ class ProductSearch:
 
                 stop_list.append(best_product) ##Добавляем название продукта в стоп-лист
 
-                print(f"На выходе: {stop_list}")
+                #print(f"На выходе: {stop_list}")
                 ##Если длина более 5 элементов или же 5 - будем чистить стоп-лист
                 if len(stop_list) >= 5:
                     stop_list = []

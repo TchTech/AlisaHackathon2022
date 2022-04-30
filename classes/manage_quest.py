@@ -80,6 +80,7 @@ class Quest():
     ##Проверка введённого текста пользователем на правильный ответ
     def IsRightAnswer(self, answer: str) -> list:
         
+        #print(f"Это ответ пользователя: {answer}")
         for i in answer.lower().split():
             if i in self.right_answer["Продукт"].replace("-", " ").split():
                 return [True,
