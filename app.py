@@ -1,4 +1,4 @@
-# -*- coding: utf-16 -*-
+# -*- coding: utf-8 -*-
 import os, sys
 from flask import Flask, request
 import random
