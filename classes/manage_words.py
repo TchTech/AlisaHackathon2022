@@ -51,7 +51,7 @@ class CorrectString:
                 return text
 
         def go_to_nominative(self, word_to_nominative):
-                not_to_nominative_words = ["суши", "сливки"] ##Слова которые не надо переводить в именительный падеж
+                not_to_nominative_words = ["суши", "сливки", "сушки"] ##Слова которые не надо переводить в именительный падеж
                 word_to_nominative = word_to_nominative.lower()
                 morph = pymorphy2.MorphAnalyzer()
                 new_word_construct = []
