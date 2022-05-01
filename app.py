@@ -424,7 +424,7 @@ def main():
                 ##В словарь с: пользователь в ветке подсказки или нет - ставим False - поскольку он ввёл уже ингредиент и получил ответ
                 users_saying_ingridient[user_id] = False
 
-                ##Возвращаем ответ Алисе
+                ##Возвращаем ответ алисе
                 return response_to_alice.simply_response(response_text, response_speak, buttons)
 
             ##Ветка с советом какого-либо продукта
