@@ -258,7 +258,7 @@ def main():
                     sex = "мужской"
                 else:
                     sex = "женский"
-                response_text = f"Хорошо, ваш пол: {sex}.\nТеперь укажите ваш возраст:"
+                response_text = "Хорошо, ваш пол: " + str(sex) + ".\nТеперь укажите ваш возраст:"
                 response_speak = response_text
                 #buttons = MoreAndQuestButtons
                 buttons = QuitAdviceButton
