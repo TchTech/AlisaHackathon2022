@@ -254,7 +254,10 @@ def main():
 
             ##Запоминаем пол пользователя
             if len(re.findall("муж.{0,}|жен.{0,}", text)) > 0 and (users_states[user_id].say_sex == True or users_states[user_id].states_list[0] == True):
-                sex = "мужской" if re.findall("муж.{0,}|жен.{0,}", text)[0][0:3] == "муж" else "женский"
+                if re.findall("муж.{0,}|жен.{0,}", text)[0][0:3] == "муж":
+                    sex = "мужской"
+                else:
+                    sex = "женский"
                 response_text = f"Хорошо, ваш пол: {sex}.\nТеперь укажите ваш возраст:"
                 response_speak = response_text
                 #buttons = MoreAndQuestButtons
