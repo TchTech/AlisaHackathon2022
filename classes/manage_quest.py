@@ -84,8 +84,8 @@ class Quest():
         for i in answer.lower().split():
             if i in self.right_answer["Продукт"].replace("-", " ").split():
                 return [True,
-                "Молодец, это был правильный ответ!",
-                "Молодец, это был правильный ответ!",
+                "Супер, это был правильный ответ!",
+                "Супер, это был правильный ответ!",
                 [{"title": f"Расскажи про {self.right_answer['Продукт']}", "hide": False},
                  {"title": "Квест", "hide": True},
                  {"title": "Помощь", "hide": True}

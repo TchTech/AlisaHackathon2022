@@ -4,6 +4,7 @@ import random
 from config import category_imgs_id, DEFAULT_IMG_ID
 import threading
 from time import sleep
+import re
 
 
 ##Класс с информацией о продукте
@@ -121,6 +122,12 @@ class InfoProduct:
                             self.calories = all_products[key][4] if float(all_products[key][4]) > 0.0 else all_products[key][4].replace("0", "менее 0.1")
                             self.category = all_products[key][5]
 
+                            ##Переменные для дальнейшего подсчёта
+                            self.proteins_to_calculate = row["Белки"]
+                            self.fats_to_calculate = row["Жиры"]
+                            self.carbohydrates_to_calculate = row["Углеводы"]
+                            self.calories_to_calculate = row["Калории"]
+
                             ##Картинка категории для отображения в карточке
                             self.product_img = category_imgs_id[self.category.lower()]
                             self.title_card = self.name.split()[0].title() + " " + " ".join(self.name.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
@@ -221,16 +228,16 @@ class InfoProduct:
             
             ##Если названный продукт уже есть в списке продуктов
             if self.is_same_in_list(self.user_product, self.users_products_list) != True:
-                return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""",
-                        f"""В продукте \"{self.user_product}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм!!,  калорий: {self.calories} ккал""")
+                return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал.""",
+                        f"""В продукте \"{self.user_product}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм. углеводов: {self.carbohydrates} грамм,  калорий: {self.calories} ккал.""")
             else:
-                return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал""",
-                        f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм!!, калорий: {self.calories} ккал""")
+                return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал.""",
+                        f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм. углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал.""")
 
         ##Если какой-то атрибут равен None (т.е., продукт не был найден) - отсылаем сообщение об ошибке         
         else:
-            return (f"Продукт \"{self.user_product_not_nominative}\" не найден...\nВы можете отправить отчёт об ошибке с помощью команды \"Ошибка\"",
-                    f"Продукт \"{self.user_product_not_nominative}\" не найден, но вы можете отправить отчёт об ошибке с помощью команды \"Ошибка\"")
+            return (f"Продукт \"{self.user_product_not_nominative}\" не найден...\nВы можете отправить отчёт об ошибке с помощью команды \"Ошибка\".",
+                    f"Продукт \"{self.user_product_not_nominative}\" не найден, но вы можете отправить отчёт об ошибке с помощью команды \"Ошибка\".")
     
     ##Метод проверки: есть ли продукт НАЗВАННЫЙ пользователем в списке всех его названных продуктов
     def is_same_in_list(self, product: str, users_products: list) -> bool:
@@ -253,6 +260,7 @@ class InfoProduct:
 
         ##Если продукт БЫЛ НАЙДЕН - осуществляем манипуляции с переменными и выводим бжу на n-грамм продукта
         if self.name != None:
+            print(self.name, " -- -- - - -")
             if "кил" in weight[1] or "кел" in weight[1] or "кг" == weight[1]:
                 coefficient *= 1000
                 weight_for_user *= 1000
@@ -443,7 +451,7 @@ class ProductSearch:
 
         digit_index = None
         for word in range(len(text)):
-            if text[word].replace(".", "").replace(",", "").isdigit():
+            if text[word].replace(".", "").replace(",", "").isdigit() and len(re.findall(r"\bб[ие]л[а-я]\w*|\bж[иы]р[а-я]\w*|\bу[гк]л[еи][вф]\w*|\bк[ао]лор\w*", " ".join(text[word::]))) > 0:
                 if len(new_text_construct) > 0:
                     new_text_construct.insert(0, text[word])
                     new_text_construct.pop()

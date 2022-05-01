@@ -73,6 +73,7 @@ class CorrectString:
 
         ##Удаляем все слова чтобы посчитать
         def remove_other_words_to_calculate(self, text, words_before_product: list, words_after_product: list) -> tuple:
+                print(text)
                 text = text.split()
                 product = []
                 weight = []
@@ -94,4 +95,5 @@ class CorrectString:
                 for i in text[index+1::]:
                         weight.append(i)
 
+                print(" ".join(product), " ".join(weight))
                 return (" ".join(product), " ".join(weight))
