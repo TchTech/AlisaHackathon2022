@@ -20,7 +20,7 @@ from classes.manage_intellect import Recommender
 ##WSGI - приложение
 app = Flask(__name__)
 
-##Создание json
+##Создание jsona
 json = JsonManager("words.json")
 phrases_json = json.json_object["Phrases"]
 buttons_json = json.json_object["Buttons"]
