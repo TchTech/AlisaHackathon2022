@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+import os, sys
 from flask import Flask, request
 import random
 from config import LOGO_IMG_ID, ERROR_IMG_ID
