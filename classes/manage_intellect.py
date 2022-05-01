@@ -3,8 +3,10 @@ from transformers import AutoTokenizer, AutoModel
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 
-t=AutoTokenizer.from_pretrained("DeepPavlov/distilrubert-tiny-cased-conversational-v1", model_max_length=512)
+
+t=AutoTokenizer.from_pretrained("DeepPavlov/distilrubert-tiny-cased-conversational-v1", model_max_length=100)
 m=AutoModel.from_pretrained("DeepPavlov/distilrubert-tiny-cased-conversational-v1")
+
 
 class Recommender:
     
