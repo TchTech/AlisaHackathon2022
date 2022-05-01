@@ -376,7 +376,7 @@ def main():
                 return response_to_alice.simply_response(response_text, response_speak, buttons)
 
 
-            ##Ветка с советом продукта от ИИ по ингредиенту
+            ##Ветка с советом продукта от ии по ингредиенту
             if len(re.findall("п[оа][дт][сз][кг][ао][жш][иы]|п[оа][дт][бп][еи]ри", text)) > 0:
                 response_text = "Готова подобрать блюдо! Пожалуйста, введите название ингредиента блюда (к примеру: яблоко):"
                 response_speak = response_text
