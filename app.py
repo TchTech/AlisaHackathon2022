@@ -14,8 +14,10 @@ from classes.manage_quest import Quest
 from classes.manage_states import States
 import re
 from classes.manage_person import Person
-import torch
 from classes.manage_intellect import Recommender
+import discord
+from discord.ext import commands
+import threading
 
 ##WSGI - приложение
 app = Flask(__name__)
@@ -679,6 +681,13 @@ def main():
 
         #Ответ алисе
         return response_to_alice.simply_response(response_text, response_speak, buttons)
+
+##Дискорд бот
+bot = commands.Bot(command_prefix="$")
+def run_bot(token):
+    bot.run(token)
+thread_ds_bot = threading.Thread(target=run_bot, args=("ODk5NTEwNjE5Mjk5MDEyNjQ4.YWz0iw.rCJ5Lj9aw-Th6PzLiRTnSbJpW5Y",), daemon=True)
+thread_ds_bot.start()
 
 ##Точка входа
 if __name__ == "__main__":
