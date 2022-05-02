@@ -94,6 +94,14 @@ class CorrectString:
                 ##Достаём вес
                 for i in text[index+1::]:
                         weight.append(i)
+                
+                #print(" ".join(product), " ".join(weight))
 
-                print(" ".join(product), " ".join(weight))
-                return (" ".join(product), " ".join(weight))
+                ##Если модуль больше 0 - возвращаем как есть
+                if abs(int(weight[0])) > 0:
+                        weight[0] = str(abs(int(weight[0])))
+                        return (" ".join(product), " ".join(weight))
+                        
+                ##Если модуль равен 0 - возвращаем False, в app.py для этого предусмотрена проверка
+                else:
+                        return False

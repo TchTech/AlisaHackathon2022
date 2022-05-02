@@ -74,7 +74,7 @@ class Quest():
 
         return [
             f"Алиса хочет съесть продукт с {self.lim} содержанием {self.list_of_titles[self.index_of_category]}. Что ей лучше съесть?\n1. {first_product_name}\n2. {second_product_name}\n3. {thirth_product_name}",
-            f"Алиса хочет съесть продукт с {self.lim} содержанием {self.list_of_titles[self.index_of_category]}. Что ей лучше съесть?\nпервое. {first_product_name}\nвторое. {second_product_name}\nтретье. {thirth_product_name}"
+            f"Алиса хочет съесть продукт сcc {self.lim} содержанием {self.list_of_titles[self.index_of_category]}. Что ей лучше съесть?\nпервое. {first_product_name}\nвторое. {second_product_name}\nтретье. {thirth_product_name}"
         ]
 
     ##Проверка введённого текста пользователем на правильный ответ
