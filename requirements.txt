@@ -1,11 +1,16 @@
+aiohttp==3.7.4.post0
+async-timeout==3.0.1
 attrs==21.4.0
 beautifulsoup4==4.11.1
 certifi==2021.10.8
+chardet==4.0.0
 charset-normalizer==2.0.12
 click==8.1.2
 colorama==0.4.4
 DAWG-Python==0.7.2
 dialogic==0.3.20
+discord==1.7.3
+discord.py==1.7.3
 docopt==0.6.2
 filelock==3.6.0
 Flask==2.1.1
@@ -20,6 +25,7 @@ itsdangerous==2.1.2
 Jinja2==3.1.1
 joblib==1.1.0
 MarkupSafe==2.1.1
+multidict==6.0.2
 numpy==1.22.3
 packaging==21.3
 pandas==1.4.2
@@ -51,4 +57,5 @@ transformers==4.18.0
 typing_extensions==4.2.0
 urllib3==1.26.9
 Werkzeug==2.1.1
+yarl==1.7.2
 zipp==3.8.0

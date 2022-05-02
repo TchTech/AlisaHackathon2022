@@ -686,7 +686,7 @@ def main():
 bot = commands.Bot(command_prefix="$")
 def run_bot(token):
     bot.run(token)
-thread_ds_bot = threading.Thread(target=run_bot, args=("ODk5NTEwNjE5Mjk5MDEyNjQ4.YWz0iw.kCNN2Ehhx0XYYoUvb_Zp8MrJJf4",), daemon=True)
+thread_ds_bot = threading.Thread(target=run_bot, args=("ODk5NTEwNjE5Mjk5MDEyNjQ4.YWz0iw.1WTCvA7dgbb0RdI0PdI9mMe0K7w",), daemon=True)
 thread_ds_bot.start()
 
 ##Точка входа
