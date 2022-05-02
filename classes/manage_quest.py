@@ -74,7 +74,7 @@ class Quest():
 
         return [
             f"Алиса хочет съесть продукт с {self.lim} содержанием {self.list_of_titles[self.index_of_category]}. Что ей лучше съесть?\n1. {first_product_name}\n2. {second_product_name}\n3. {thirth_product_name}",
-            f"Алиса хочет съесть продукт сcc {self.lim} содержанием {self.list_of_titles[self.index_of_category]}. Что ей лучше съесть?\nпервое. {first_product_name}\nвторое. {second_product_name}\nтретье. {thirth_product_name}"
+            f"Алиса хочет съесть продукт с {self.lim} содержанием {self.list_of_titles[self.index_of_category]}. Что ей лучше съесть?\nпервое. {first_product_name}\nвторое. {second_product_name}\nтретье. {thirth_product_name}"
         ]
 
     ##Проверка введённого текста пользователем на правильный ответ
@@ -133,6 +133,9 @@ class Quest():
         ##Окончания прилагательных кладём в список
         adject_endings = ["ой", "ий", "ый", "ая", "ья", "ое", "ее", "ье", "ые", "ие", "ьи"]
 
+        ##Слова-исключения (с окончаниями как у прилагательных)
+        exception_words = ["варенье"]
+
         ##Проверки для того, чтобы не отобразить пользователю одно лишь прилагательное
         if txt_first_btn.endswith("ой") or txt_first_btn.endswith("ий")\
         or txt_first_btn.endswith("ый") or txt_first_btn.endswith("ая")\
@@ -140,7 +143,8 @@ class Quest():
         or txt_first_btn.endswith("ие") or txt_first_btn.endswith("ые")\
         or txt_first_btn.endswith("ья") and self.first["Продукт"].split()[1][-2::] not in adject_endings\
         or txt_first_btn.endswith("ье") and self.first["Продукт"].split()[1][-2::] not in adject_endings\
-        or txt_first_btn.endswith("ьи") and self.first["Продукт"].split()[1][-2::] not in adject_endings:
+        or txt_first_btn.endswith("ьи") and self.first["Продукт"].split()[1][-2::] not in adject_endings\
+        and txt_first_btn.lower() not in exception_words:
 
             try:
                 txt_first_btn += f" {self.first['Продукт'].split()[1]}"
@@ -153,7 +157,8 @@ class Quest():
         or txt_second_btn.endswith("ие") or txt_second_btn.endswith("ые")\
         or txt_second_btn.endswith("ья") and self.second["Продукт"].split()[1][-2::] not in adject_endings\
         or txt_second_btn.endswith("ье") and self.second["Продукт"].split()[1][-2::] not in adject_endings\
-        or txt_second_btn.endswith("ьи") and self.second["Продукт"].split()[1][-2::] not in adject_endings:
+        or txt_second_btn.endswith("ьи") and self.second["Продукт"].split()[1][-2::] not in adject_endings\
+        and txt_second_btn.lower() not in exception_words:
 
             try:
                 txt_second_btn += f" {self.second['Продукт'].split()[1]}"
@@ -167,7 +172,8 @@ class Quest():
         or txt_thirth_btn.endswith("ие") or txt_thirth_btn.endswith("ые")\
         or txt_thirth_btn.endswith("ья") and self.thirth["Продукт"].split()[1][-2::] not in adject_endings\
         or txt_thirth_btn.endswith("ье") and self.thirth["Продукт"].split()[1][-2::] not in adject_endings\
-        or txt_thirth_btn.endswith("ьи") and self.thirth["Продукт"].split()[1][-2::] not in adject_endings:
+        or txt_thirth_btn.endswith("ьи") and self.thirth["Продукт"].split()[1][-2::] not in adject_endings\
+        and txt_third_btn.lower() not in exception_words:
 
             try:
                 txt_thirth_btn += f" {self.thirth['Продукт'].split()[1]}"

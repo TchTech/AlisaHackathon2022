@@ -17,27 +17,32 @@ class Recommender:
         self.ingr = ingridient
         self.recipes = self.eda_file['ingridient_keywords'].to_list()
         self.idxs = [i for i in range(0, len(self.recipes)) if self.ingr.lower() in self.recipes[i].lower()]
-        #self.idxs = self.idxs[0:min(5, len(self.idxs))]
-        score_by_idx = {}
-        
-        for idx in self.idxs:
-            score_by_idx[idx] = random.randint(0, 11)#self.bert_score(self.eda_file.iloc[idx]['name'], self.ingr)
-        
-        score_by_idx = dict(sorted(score_by_idx.items(), key=lambda item: item[1]))
-
         self.result = ""
-
         self.speech = self.result
+        if len(self.idxs)>0:
+            score_by_idx = {}
+            
+            for idx in self.idxs:
+                score_by_idx[idx] = random.randint(0, 11)#self.bert_score(self.eda_file.iloc[idx]['name'], self.ingr)
+            
+            score_by_idx = dict(sorted(score_by_idx.items(), key=lambda item: item[1]))
 
-        for i in range(0, min(len(score_by_idx), 5)):
-            beautiful_params = self.eda_file.iloc[list(score_by_idx.keys())[i]]['list_bzu'].replace("[", "").replace("]", "").replace("'", "").replace("КАЛОРИЙНОСТЬ", "калорий:").replace("ККАЛ", " ккал").replace("БЕЛКИ", "белков:").replace("ГРАММ", "г").replace("ЖИРЫ", "жиров:").replace("УГЛЕВОДЫ", "углеводов:")
+            self.result = "По запросу \"" + ingridient + "\" получены следующие результаты:"
 
-            self.result += "\n"+self.eda_file.iloc[list(score_by_idx.keys())[i]]['name'] + " - (" + beautiful_params + ")\n"
+            self.speech = self.result
 
-            self.speech += "\n"+self.eda_file.iloc[list(score_by_idx.keys())[i]]['name']
+            for i in range(0, min(len(score_by_idx), 5)):
+                beautiful_params = self.eda_file.iloc[list(score_by_idx.keys())[i]]['list_bzu'].replace("[", "").replace("]", "").replace("'", "").replace("КАЛОРИЙНОСТЬ", "калорий:").replace("ККАЛ", " ккал").replace("БЕЛКИ", "белков:").replace("ГРАММ", "г").replace("ЖИРЫ", "жиров:").replace("УГЛЕВОДЫ", "углеводов:")
 
-        self.result+="\n"+"Подробнее о блюдах можно узнать на eda.ru"
-        self.speech+="\n"+"Подробнее о блюдах можно узнать на еда точка ру"
+                self.result += "\n• "+self.eda_file.iloc[list(score_by_idx.keys())[i]]['name'] + " - (" + beautiful_params + ")\n"
+
+                self.speech += "\n"+self.eda_file.iloc[list(score_by_idx.keys())[i]]['name']
+
+            self.result+="\n"+"Подробнее о блюдах можно узнать на сайте eda.ru"
+            self.speech+="\n"+"Подробнее о блюдах можно узнать на сайте еда точка ру"
+        else:
+            self.result+="\n"+"Извините, я искала вдоль и поперек, но ничего не смогла найти..."
+            self.speech+="\n"+"Извините, я искала вдоль и поперёк, но ничего не смогла найти"
 
     def get_dishes(self):
         return self.result
