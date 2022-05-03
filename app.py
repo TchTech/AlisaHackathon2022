@@ -772,6 +772,7 @@ def main():
                 users_first_command[user_id] = False ##Ставим в словаре с ключом айди то, что пользователь не написал первую команду
                 users_stop_list_products[user_id] = [] ##В значение стоп листа ставим пустой список, дабы потом в него осуществлять добавку при вводе пользователем продуктов
                 users_playing_quest[user_id] = False ##В значение игры в квест ставим False, поскольку навык был перезапущен
+                users_saying_ingridient[user_id] = False
                 users_quest[user_id] = None
 
                 ##Возвращаем ответ Алисе
@@ -787,6 +788,7 @@ def main():
 
                 users_stop_list_products[user_id] = []
                 users_playing_quest[user_id] = False ##В значение игры в квест ставим False,  поскольку навык был перезапущен
+                users_saying_ingridient[user_id] = False
                 users_states[user_id] = States() ##В состояния советования нормы БЖУ -- обнуление
                 users_quest[user_id] = None
 
