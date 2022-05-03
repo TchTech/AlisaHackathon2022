@@ -1,5 +1,6 @@
 import json
 import pymorphy2
+from math import trunc
 
 class JsonManager():
         json_object: dict = None
@@ -98,10 +99,11 @@ class CorrectString:
                 print(" ".join(product), " ".join(weight))
 
                 ##Если модуль больше 0 - возвращаем как есть
-                if abs(int(weight[0])) > 0:
-                        weight[0] = str(abs(int(weight[0])))
+                if abs(int(trunc(float(weight[0])))) > 0:
+                        weight[0] = str(abs(int(trunc(float(weight[0])))))
                         return (" ".join(product), " ".join(weight))
 
                 ##Если модуль равен 0 - возвращаем False, в app.py для этого предусмотрена проверка
                 else:
-                        return False
+                        weight[0] = str(1)
+                        return (" ".join(product), " ".join(weight))
