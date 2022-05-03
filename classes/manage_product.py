@@ -261,7 +261,7 @@ class InfoProduct:
 
         ##Если продукт БЫЛ НАЙДЕН - осуществляем манипуляции с переменными и выводим бжу на n-грамм продукта
         if self.name != None:
-            print(self.name, " -- -- - - -")
+            #print(self.name, " -- -- - - -")
             if "кил" in weight[1] or "кел" in weight[1] or "кг" == weight[1]:
                 coefficient *= 1000
                 weight_for_user *= 1000
@@ -269,7 +269,7 @@ class InfoProduct:
             proteins = round(float(self.proteins_to_calculate) * coefficient, 1) if float(round(float(self.proteins_to_calculate) * coefficient, 1)) > 0.0 else str(round(float(self.proteins_to_calculate) * coefficient, 1)).replace("0.0", "менее 0.1")
             fats = round(float(self.fats_to_calculate) * coefficient, 1) if float(round(float(self.fats_to_calculate) * coefficient, 1)) > 0.0 else str(round(float(self.fats_to_calculate) * coefficient, 1)).replace("0.0", "менее 0.1")
             carbohydrates = round(float(self.carbohydrates_to_calculate) * coefficient, 1) if float(round(float(self.carbohydrates_to_calculate) * coefficient, 1)) > 0.0 else str(round(float(self.carbohydrates_to_calculate) * coefficient, 1)).replace("0.0", "менее 0.1")
-            calories = int(self.calories_to_calculate) * coefficient if float(round(float(self.calories_to_calculate) * coefficient, 1)) else str(round(float(self.calories_to_calculate) * coefficient, 1)).replace("0.0", "менее 0.1")
+            calories = int(int(self.calories_to_calculate) * coefficient) if int(int(self.calories_to_calculate) * coefficient) != 0 else "менее 0.1"
 
             return (f"В продукте \"{self.name}\" на {weight_for_user} грамм содержится:\n• Белков: {proteins} грамм\n• Жиров: {fats} грамм\n• Углеводов: {carbohydrates} грамм\n• Калорий: {calories} ккал",
                     f"В продукте \"{self.name}\" на {weight_for_user} грамм содержится:\n• Белков: {proteins} грамм\n• Жиров: {fats} грамм\n• Углеводов: {carbohydrates} грамм\n• Калорий: {calories} ккал"
@@ -394,7 +394,7 @@ class ProductSearch:
                         best_value = abs(float(row[category.lower().title()]) - value)
                         best_value_of_category = float(row[category.lower().title()])
                         type_of_product = row["Категория"]
-      
+                    
                     if abs(float(row[category.lower().title()]) - value) < best_value and row["Продукт"] not in stop_list:
                         best_product = row["Продукт"]
                         best_value = abs(float(row[category.lower().title()]) - value)
@@ -447,11 +447,13 @@ class ProductSearch:
 
     ##Метод для удаления всех слов, кроме количества какой-либо характеристики
     def remove_all_in_specification(self, text: str):
+        print(text)
         text = text.split()
         new_text_construct = [] ##Сюда будем класть количество(цифру) и характеристику
 
         digit_index = None
         for word in range(len(text)):
+            #print(text[word], "---")
             if text[word].replace(".", "").replace(",", "").isdigit() and len(re.findall(r"\bб[ие]л[а-я]\w*|\bж[иы]р[а-я]\w*|\bу[гк]л[еи][вф]\w*|\bк[ао]лор\w*", " ".join(text[word::]))) > 0:
                 if len(new_text_construct) > 0:
                     new_text_construct.insert(0, text[word])
@@ -460,16 +462,17 @@ class ProductSearch:
                     new_text_construct.insert(0, text[word])
 
                 digit_index = word
-
+        
         for word in text[digit_index::]:
                 if word[0] in "бжук":
                     new_text_construct.append(word)
                     break
 
         for word in new_text_construct:
-            if not word.isdigit() and word[0:3] not in ["бел", "бил", "жир", "жыр", "угл", "укл", "кал", "кол", "кил", "кел"]:
+            if not word.replace(".", "").replace(",", "").isdigit() and word[0:3] not in ["бел", "бил", "жир", "жыр", "угл", "укл", "кал", "кол", "кил", "кел"]:
                 new_text_construct.remove(word)
 
+        print(new_text_construct, "5")
         text = " ".join(new_text_construct)
         new_text_construct = []
 
@@ -488,7 +491,7 @@ class ProductSearch:
 
     ##Метод для возвращения красивого текста
     def beautiful_text(self):
-        return f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал"""
+        return f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм. углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал."""
 
     ##Метод для возврата картинки
     def get_product_img(self):

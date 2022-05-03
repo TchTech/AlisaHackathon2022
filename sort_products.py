@@ -13,6 +13,9 @@ with open("products.csv", "r") as csvfile:
         )
 
         for line in reader:
+            if "," in line["Продукт"] or not line["Вес (г)"].isdigit():
+                print(line["Продукт"], " - тут запятая")
+
             if line["Продукт"] in products_dict:
                 print(f"Повтор: {line['Продукт']}")
 
