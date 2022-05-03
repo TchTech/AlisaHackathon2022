@@ -66,7 +66,7 @@ class InfoProduct:
                         if row["Продукт"].lower() == self.user_product_not_nominative:
                             self.title_card = self.user_product_not_nominative.split()[0].title() + " " + " ".join(self.user_product_not_nominative.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
                         else:
-                            print(self.user_product_not_nominative, " --- ---")
+                            #print(self.user_product_not_nominative, " --- ---")
                             self.title_card = self.user_product.split()[0].title() + " " + " ".join(self.user_product.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
 
                         break
@@ -447,7 +447,7 @@ class ProductSearch:
 
     ##Метод для удаления всех слов, кроме количества какой-либо характеристики
     def remove_all_in_specification(self, text: str):
-        print(text)
+        #print(text)
         text = text.split()
         new_text_construct = [] ##Сюда будем класть количество(цифру) и характеристику
 
@@ -472,7 +472,7 @@ class ProductSearch:
             if not word.replace(".", "").replace(",", "").isdigit() and word[0:3] not in ["бел", "бил", "жир", "жыр", "угл", "укл", "кал", "кол", "кил", "кел"]:
                 new_text_construct.remove(word)
 
-        print(new_text_construct, "5")
+        #print(new_text_construct, "5")
         text = " ".join(new_text_construct)
         new_text_construct = []
 

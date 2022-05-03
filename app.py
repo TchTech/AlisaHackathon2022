@@ -561,7 +561,7 @@ def main():
             if "посоветуй" in text or len(re.findall(r"п?[оа]?[сз][оа][вф][еи][тд][ую][ий]?", text)) > 0:
                 #specification = ProductSearch(users_stop_list_products[user_id]).remove_all_in_specification(text)
                 specification = ProductSearch(users_advice_stop_list[user_id]).remove_all_in_specification(text_correctly)
-                print(specification, "!!!")
+                #print(specification, "!!!")
         
                 product = ProductSearch(users_stop_list_products[user_id]).search_by_value(float(specification.split()[0]), str(specification.split()[1]).lower(), users_advice_stop_list[user_id])
                 
@@ -681,7 +681,7 @@ def main():
             ##Ветка на "посчитай" или "рассчитай": посчитай гречку на 300 грамм
             if len(re.findall(r"п[оа][сз][чщ].?[ие][тд]а[йи]|р[оа][сз][сз]?ч[ие][тд]ай", text)) > 0 or "посчитай" in text or "рассчитай" in text:
                 product = CorrectString().remove_other_words_to_calculate(text_correctly, ActivationCalculate["before"], ActivationCalculate["after"])
-                print(users_calculate_stop_list[user_id], "--------- - ?")
+                #print(users_calculate_stop_list[user_id], "--------- - ?")
                 ##Если вес равен нулю
                 if product == False:
                     response_text = f"Вес продукта должен быть больше нуля!"
