@@ -14,7 +14,7 @@ class Recommender:
         # self.tokenizer = t
         # self.rubert_model = m
         self.eda_file = pd.read_csv("1k_food.csv")
-        self.ingr = ingridient
+        self.ingr = "'"+ingridient+"'"
         self.recipes = self.eda_file['ingridient_keywords'].to_list()
         self.idxs = [i for i in range(0, len(self.recipes)) if self.ingr.lower() in self.recipes[i].lower()]
         self.result = ""
@@ -27,7 +27,7 @@ class Recommender:
             
             score_by_idx = dict(sorted(score_by_idx.items(), key=lambda item: item[1]))
 
-            self.result = "По запросу \"" + ingridient + "\" получены следующие результаты:"
+            self.result = "По запросу \"" + ingridient + "\" получены следующие результаты:\n"
 
             self.speech = self.result
 
