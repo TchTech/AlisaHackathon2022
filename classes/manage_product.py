@@ -5,6 +5,7 @@ from config import category_imgs_id, DEFAULT_IMG_ID
 import threading
 from time import sleep
 import re
+from classes.alphabet import Alphabet
 
 
 ##Класс с информацией о продукте
@@ -20,8 +21,14 @@ class InfoProduct:
     product_img: str = None ##Картинка
     
     def __init__(self, product: str, stop_list: list, users_products: list, check=False): #Инициализация объекта (конструктор)
-        self.user_product = self.__go_to_nominative(product.lower()) ##Далее будет использовано в методе .beautiful_text()
-        self.user_product_not_nominative = product
+        self.user_product = self.__go_to_nominative(product.lower().replace("%", "").strip()) ##Далее будет использовано в методе .beautiful_text()
+        self.user_product_not_nominative = product.replace("%", "").strip()
+
+        self.user_product_to_display = self.__go_to_nominative(product.lower()) ##Далее будет использовано для отображения пользователю
+        self.user_product_not_nominative_to_display = product
+        self.user_product_translit = Alphabet().go_translit(self.user_product_to_display)
+        print(f"Прошло через транслит: {self.user_product_translit}")
+
         self.users_products_list = users_products
         #print(f"{self.user_product}, {self.user_product_not_nominative} ---------------- ", product)
         self.stop_list = stop_list ##Стоп-лист
@@ -43,8 +50,8 @@ class InfoProduct:
 
                     all_products[row["Продукт"]] = [row["Вес (г)"], row["Белки"], row["Жиры"], row["Углеводы"], row["Калории"], row["Категория"]]
 
-                if self.__IsAlike(self.user_product, row["Продукт"]) or self.__IsAlike(self.user_product_not_nominative, row["Продукт"]):
-                    if row["Продукт"] not in self.stop_list or row["Продукт"].lower() == self.user_product_not_nominative: 
+                if self.__IsAlike(self.user_product, row["Продукт"].replace("%", "").strip()) or self.__IsAlike(self.user_product_not_nominative, row["Продукт"].replace("%", "").strip()) or self.__IsAlike(self.user_product_translit, row["Продукт"].replace("%", "").strip()):
+                    if row["Продукт"] not in self.stop_list or row["Продукт"].lower().replace("%", "").strip() == self.user_product_not_nominative: 
                         self.name = row["Продукт"]
                         self.weight = row["Вес (г)"]
                         self.proteins = row["Белки"] if float(row["Белки"]) > 0.0 else row["Белки"].replace("0.0", "менее 0.1")
@@ -63,12 +70,13 @@ class InfoProduct:
                         self.product_img = category_imgs_id[self.category.lower()]
 
                         ##Если продукт совпал напрямую - то в заголовок карточки ставим название из БД
-                        if row["Продукт"].lower() == self.user_product_not_nominative:
-                            self.title_card = self.user_product_not_nominative.split()[0].title() + " " + " ".join(self.user_product_not_nominative.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
+                        if row["Продукт"].lower() == self.user_product_not_nominative_to_display:
+                            self.title_card = self.user_product_not_nominative_to_display.split()[0].title() + " " + " ".join(self.user_product_not_nominative_to_display.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
                         else:
                             #print(self.user_product_not_nominative, " --- ---")
-                            self.title_card = self.user_product.split()[0].title() + " " + " ".join(self.user_product.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
+                            self.title_card = self.user_product_to_display.split()[0].title() + " " + " ".join(self.user_product_to_display.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
 
+                        print(self.title_card, self.user_product_to_display, self.user_product_not_nominative_to_display)
                         break
 
                     ##Если продукт в стоп-листе и резервный продукт ничему не равен - присваиваем ему это значение, если продукт более не будет найден - используем его
@@ -106,14 +114,14 @@ class InfoProduct:
                     self.product_img = category_imgs_id[self.category.lower()]
 
                     ##Если продукт совпал напрямую - то в заголовок карточки ставим название из БД
-                    if row["Продукт"].lower() == self.user_product_not_nominative:
-                        self.title_card = self.user_product_not_nominative.split()[0].title() + " " + " ".join(self.user_product_not_nominative.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
+                    if row["Продукт"].lower() == self.user_product_not_nominative_to_display:
+                        self.title_card = self.user_product_not_nominative_to_display.split()[0].title() + " " + " ".join(self.user_product_not_nominative_to_display.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
                     else:
-                        self.title_card = self.user_product.split()[0].title() + " " + " ".join(self.user_product.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
+                        self.title_card = self.user_product_to_display.split()[0].title() + " " + " ".join(self.user_product_to_display.split()[1::]) + f" ({self.category})" ##Первое слово в продукте делаем с заглавной буквой, далее пишем пробел, далее всё остальное. Потом прибавляем категорию продукта
                 else:
                     ##Пробегаемся по списку(словарю) всех продуктов, используя расстояние Левенштейна
                     for key in all_products:
-                        if (self.levenshtein(key, self.user_product) < 3 or self.levenshtein(key, self.user_product_not_nominative) <= 4)\
+                        if (self.levenshtein(key, self.user_product) < 3 or self.levenshtein(key, self.user_product_not_nominative) <= 4 or self.levenshtein(key, self.user_product_translit))\
                             and self.user_product_not_nominative[0] == key[0]:
                             self.name = key
                             self.weight = all_products[key][0]
@@ -160,16 +168,23 @@ class InfoProduct:
     
     ##Метод возвращающий слово в именительном падеже
     def __go_to_nominative(self, text):
-        not_to_nominative_words = ["суши", "сливки", "сушки"] ##Слова которые не надо переводить в именительный падеж
+        not_to_nominative_words = ["суши", "сливки", "сушки", "%"] ##Слова которые не надо переводить в именительный падеж
         text = text.lower().split(" ")
         morph = pymorphy2.MorphAnalyzer()
         new_text_construct = []
 
+        ##Проверяем на необычные продукты
+        non_default_products = self.get_some_not_default_products(text)
+        print(text)
+        print(non_default_products)
+        if non_default_products[1] == True:
+            return non_default_products[0]
+        
         ##Цикл для того, чтобы все слова в продукте перевести в именительный падеж
         next_skip = False
         for word in range(len(text)):
             try:
-                if text[word] in not_to_nominative_words:
+                if len(re.findall(r"\d+", text[word])) > 0 or text[word] in not_to_nominative_words:
                     new_text_construct.append(text[word])
                     continue
 
@@ -190,6 +205,16 @@ class InfoProduct:
 
         return " ".join(new_text_construct).replace("ё", "е") ##Возвращаем слово в именительном падеже
 
+
+    def get_some_not_default_products(self, text_list: list) -> tuple:
+        text_list = list(map(lambda x: x[0:-1], text_list))
+        if "фант" in text_list:
+            return ("фанта", True)
+        elif "миринд" in text_list:
+            return ("миринда", True)
+
+        ##Если нет каких-то необычных продуктов
+        return ("", False)
 
     def get_json(self) -> dict: #Метод, создающий json с полями класса
         return {
@@ -230,18 +255,19 @@ class InfoProduct:
             ##Если названный продукт уже есть в списке продуктов
             if self.is_same_in_list(self.user_product, self.users_products_list) != True:
                 return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал.""",
-                        f"""В продукте \"{self.user_product}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм. углеводов: {self.carbohydrates} грамм,  калорий: {self.calories} ккал.""")
+                        f"""В продукте \"{self.user_product_to_display}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм. углеводов: {self.carbohydrates} грамм,  калорий: {self.calories} ккал.""")
             else:
                 return  (f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм, углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал.""",
                         f"""В продукте \"{self.name}\" на {self.weight} грамм содержится: белков: {self.proteins} грамм, жиров: {self.fats} грамм. углеводов: {self.carbohydrates} грамм, калорий: {self.calories} ккал.""")
 
         ##Если какой-то атрибут равен None (т.е., продукт не был найден) - отсылаем сообщение об ошибке         
         else:
-            return (f"Продукт \"{self.user_product_not_nominative}\" не найден...\nВы можете отправить отчёт об ошибке с помощью команды \"Ошибка\".",
-                    f"Продукт \"{self.user_product_not_nominative}\" не найден, но вы можете отправить отчёт об ошибке с помощью команды \"Ошибка\".")
+            return (f"Продукт \"{self.user_product_not_nominative_to_display}\" не найден...\nВы можете отправить отчёт об ошибке с помощью команды \"Ошибка\".",
+                    f"Продукт \"{self.user_product_not_nominative_to_display}\" не найден, но вы можете отправить отчёт об ошибке с помощью команды \"Ошибка\".")
     
     ##Метод проверки: есть ли продукт НАЗВАННЫЙ пользователем в списке всех его названных продуктов
     def is_same_in_list(self, product: str, users_products: list) -> bool:
+        #print(users_products, "-----------")
         if product in users_products:
             #print(f"Продукт {product} в {users_products}")
             return True
@@ -257,7 +283,7 @@ class InfoProduct:
             weight_for_user = int(weight[0])
             coefficient = (float(weight[0]))/100
         except ValueError: ##Ошибка будет если не был указан вес
-            return f"Необходимо указать корректный вес!\nНапример: посчитай {self.user_product_not_nominative} на 100 грамм"
+            return f"Необходимо указать корректный вес!\nНапример: посчитай {self.user_product_not_nominative_to_display} на 100 грамм."
 
         ##Если продукт БЫЛ НАЙДЕН - осуществляем манипуляции с переменными и выводим бжу на n-грамм продукта
         if self.name != None:
@@ -275,8 +301,8 @@ class InfoProduct:
                     f"В продукте \"{self.name}\" на {weight_for_user} грамм содержится:\n• Белков: {proteins} грамм\n• Жиров: {fats} грамм\n• Углеводов: {carbohydrates} грамм\n• Калорий: {calories} ккал"
             )
         else: ##Если продукт не был найден - возвращаем это пользователю
-            return (f"Продукт \"{self.user_product_not_nominative}\" не найден...\nВы можете отправить отчёт об ошибке с помощью команды \"Ошибка\"",
-                    f"Продукт \"{self.user_product_not_nominative}\" не найден...\nВы можете отправить отчёт об ошибке с помощью команды \"Ошибка\""
+            return (f"Продукт \"{self.user_product_not_nominative_to_display}\" не найден...\nВы можете отправить отчёт об ошибке с помощью команды \"Ошибка\"",
+                    f"Продукт \"{self.user_product_not_nominative_to_display}\" не найден...\nВы можете отправить отчёт об ошибке с помощью команды \"Ошибка\""
             )
 
     ##Метод для возврата заголовка карточки
@@ -285,8 +311,8 @@ class InfoProduct:
 
     ##Метод для получения списка последних 5 продуктов пользователя
     def get_users_products(self):
-        if self.user_product_not_nominative not in self.users_products_list:
-            self.users_products_list.append(self.user_product_not_nominative) ##Добавляем в список с продуктами пользователя введённый им продукт
+        if self.user_product_not_nominative_to_display not in self.users_products_list:
+            self.users_products_list.append(self.user_product_not_nominative_to_display) ##Добавляем в список с продуктами пользователя введённый им продукт
 
         if len(self.users_products_list) > 5:
             self.users_products_list = []
