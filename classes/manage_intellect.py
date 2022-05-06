@@ -1,18 +1,18 @@
-# import torch
-# from transformers import AutoTokenizer, AutoModel
-# from sklearn.metrics.pairwise import cosine_similarity
+import torch
+from transformers import AutoTokenizer, AutoModel
+from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 
-# t=AutoTokenizer.from_pretrained("DeepPavlov/distilrubert-tiny-cased-conversational-v1", model_max_length=512)
-# m=AutoModel.from_pretrained("DeepPavlov/distilrubert-tiny-cased-conversational-v1")
+t=AutoTokenizer.from_pretrained("DeepPavlov/distilrubert-tiny-cased-conversational-v1", model_max_length=512)
+m=AutoModel.from_pretrained("DeepPavlov/distilrubert-tiny-cased-conversational-v1")
 
-import random
+#import random
 
 class Recommender:
     
     def __init__(self, ingridient):
-        # self.tokenizer = t
-        # self.rubert_model = m
+        self.tokenizer = t
+        self.rubert_model = m
         self.eda_file = pd.read_csv("1k_food.csv")
         self.ingr = "'"+ingridient+"'"
         self.recipes = self.eda_file['ingridient_keywords'].to_list()
@@ -23,7 +23,7 @@ class Recommender:
             score_by_idx = {}
             
             for idx in self.idxs:
-                score_by_idx[idx] = random.randint(0, 11)#self.bert_score(self.eda_file.iloc[idx]['name'], self.ingr)
+                self.bert_score(self.eda_file.iloc[idx]['name'], self.ingr)
             
             score_by_idx = dict(sorted(score_by_idx.items(), key=lambda item: item[1]))
 
@@ -50,24 +50,24 @@ class Recommender:
     def get_speech(self):
         return self.speech
 
-    # def embed_bert_cls(self, text, model, tokenizer):
+    def embed_bert_cls(self, text, model, tokenizer):
         
-    #     t = tokenizer(text, padding=True, truncation=True, return_tensors='pt')
+        t = tokenizer(text, padding=True, truncation=True, return_tensors='pt')
 
-    #     with torch.no_grad():
-    #         model_output = model(**{k: v.to(model.device) for k, v in t.items()})
+        with torch.no_grad():
+            model_output = model(**{k: v.to(model.device) for k, v in t.items()})
 
-    #     embeddings = model_output.last_hidden_state[:, 0, :]
+        embeddings = model_output.last_hidden_state[:, 0, :]
 
-    #     embeddings = torch.nn.functional.normalize(embeddings)
+        embeddings = torch.nn.functional.normalize(embeddings)
 
-    #     return embeddings[0].cpu().numpy()
+        return embeddings[0].cpu().numpy()
 
-    # def bert_score(self, query, text):
-    #     query_embed = self.embed_bert_cls(query, self.rubert_model, self.tokenizer)
-    #     text_embed = self.embed_bert_cls(text, self.rubert_model, self.tokenizer)
+    def bert_score(self, query, text):
+        query_embed = self.embed_bert_cls(query, self.rubert_model, self.tokenizer)
+        text_embed = self.embed_bert_cls(text, self.rubert_model, self.tokenizer)
 
-    #     return cosine_similarity([text_embed], [query_embed])[0][0]
+        return cosine_similarity([text_embed], [query_embed])[0][0]
 # ingr = input()
 # r = Recommender(ingr)
 # print(r.get_text())
